@@ -1,0 +1,36 @@
+KOCHBUCH TO GO – WEB-APP AUFS IPHONE BRINGEN (kostenlos)
+
+Die App besteht aus wenigen Dateien (index.html, sw.js, manifest.webmanifest
+und den Logo-Bildern). Sie muss einmal ins Internet, damit Safari sie als
+App auf dem Home-Bildschirm ablegen kann.
+
+WEG 1: GITHUB PAGES (geht auch komplett am iPad)
+1. Auf github.com ein kostenloses Konto anlegen.
+2. Neues Repository anlegen ("New"), Name z. B. kochbuch-to-go, auf "Public" lassen.
+3. "uploading an existing file" bzw. "Add file > Upload files" tippen und
+   ALLE Dateien aus diesem Ordner auswählen (in der Dateien-App mehrere markieren).
+   Dann "Commit changes" tippen.
+4. Im Repository: Settings > Pages > Branch "main" auswählen > Save.
+5. Nach 1–2 Minuten erscheint dort die Adresse,
+   z. B. https://DEINNAME.github.io/kochbuch-to-go/
+
+WEG 2: NETLIFY (am einfachsten am Computer)
+1. https://app.netlify.com/drop öffnen und kostenloses Konto anlegen.
+2. Den ganzen Ordner "kochbuch-to-go" in das Feld ziehen.
+3. Du bekommst sofort eine Adresse, z. B. https://irgendwas.netlify.app
+
+AUF DEM IPHONE INSTALLIEREN
+1. Die Adresse in Safari öffnen.
+2. Teilen-Symbol (Quadrat mit Pfeil) > "Zum Home-Bildschirm" > "Hinzufügen".
+3. Fertig: Die App startet mit Logo im Vollbild und funktioniert nach dem
+   ersten Öffnen auch ohne Internet.
+   Das Gleiche geht auf jedem iPhone der Familie – jedes Gerät hat dabei
+   seine eigenen Favoriten, Pläne und eigenen Rezepte.
+
+HINWEISE
+- Timer klingeln, solange die App geöffnet ist. Bei gesperrtem iPhone
+  kann iOS den Ton unterdrücken.
+- Daten (Favoriten, Wochenplan, eigene Rezepte) werden auf dem Gerät
+  gespeichert. Wer die Website-Daten in Safari löscht, löscht sie mit.
+- Neue Version einspielen: geänderte Dateien erneut hochladen, App einmal
+  mit Internet öffnen und neu starten.

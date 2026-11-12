@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kochbuch to Go</title>
+<meta name="theme-color" content="#2F6D4F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Kochbuch to Go">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5EF; --surface:#FFFFFF; --surface2:#E8EFE9; --ink:#18261E; --muted:#5B6B61;
+  --green:#2F6D4F; --green-soft:#DCE9DF; --gold:#E2AE2A; --berry:#B23A5B; --line:#D5DED6; --on-green:#FFFFFF;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111915; --surface:#1A241E; --surface2:#22302A; --ink:#E6EEE8; --muted:#9AAAA0;
+  --green:#7BC29A; --green-soft:#22362A; --gold:#F0C75A; --berry:#E1728F; --line:#2C3A31; --on-green:#0F1A14; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#111915; --surface:#1A241E; --surface2:#22302A; --ink:#E6EEE8; --muted:#9AAAA0;
+  --green:#7BC29A; --green-soft:#22362A; --gold:#F0C75A; --berry:#E1728F; --line:#2C3A31; --on-green:#0F1A14; color-scheme:dark;}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom,0px))}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);padding:14px 0 10px}
+.top h1{margin:0;font-size:2rem;line-height:1.1;font-weight:800;letter-spacing:-.02em}
+.top .sub{color:var(--muted);font-size:.9rem;margin-top:2px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:4px 0}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:8px 14px;font-weight:600;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.input,.select,textarea.input{width:100%;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 13px}
+.select{width:auto}
+.row2{display:flex;gap:8px;margin:8px 0}
+.row2 .input{flex:1}
+.btn{border:none;border-radius:12px;padding:11px 16px;font-weight:600;background:var(--green);color:var(--on-green)}
+.btn.soft{background:var(--green-soft);color:var(--ink)}
+.btn.gold{background:var(--gold);color:#1a1a1a}
+.btn.danger{background:transparent;color:var(--berry);border:1.5px solid var(--berry)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.4}
+.link{background:none;border:none;color:var(--green);font-weight:600;padding:8px 0}
+.list{list-style:none;margin:0;padding:0}
+.rrow{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);padding:12px 2px}
+.kc{flex:0 0 54px;height:54px;border-radius:50%;display:grid;place-items:center;text-align:center;line-height:1;font-weight:800}
+.kc small{display:block;font-weight:400;font-size:.66rem;color:var(--muted);margin-top:2px}
+.rrow h3{margin:0;font-size:1.05rem;font-weight:600;line-height:1.25}
+.meta{color:var(--muted);font-size:.86rem;margin-top:3px;display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 8px}
+.heart{margin-left:auto;color:var(--berry)}
+.empty{padding:36px 8px;color:var(--muted);text-align:center}
+.sec-h{font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:22px 0 6px;display:flex;justify-content:space-between}
+.card{background:var(--surface);border-radius:16px;padding:6px 14px;margin-bottom:12px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+.tabbar .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;font-weight:600;color:var(--muted);padding:4px}
+.tab svg{width:24px;height:24px}
+.tab[aria-current="page"]{color:var(--green)}
+.timerpill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:16;background:var(--ink);color:var(--bg);border:none;border-radius:999px;padding:9px 16px;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+dialog{border:none;padding:0;background:var(--bg);color:var(--ink);width:100%;max-width:720px;height:100%;max-height:100%;margin:0 auto}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+.sheet{height:100%;overflow-y:auto;padding:calc(12px + env(safe-area-inset-top,0px)) 18px calc(28px + env(safe-area-inset-bottom,0px))}
+.sheet-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px}
+.x{border:none;background:var(--surface2);border-radius:999px;padding:8px 14px;font-weight:600}
+.dt-cat{color:var(--green);font-weight:700;font-size:.95rem}
+.dt-h{font-size:1.9rem;line-height:1.1;margin:4px 0 6px;font-weight:800;letter-spacing:-.02em}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.fact{background:var(--surface);border-radius:14px;padding:10px 12px}
+.fact b{display:block;font-size:1.05rem;line-height:1.2}
+.fact span{color:var(--muted);font-size:.78rem}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.acts .btn{flex:1 1 auto}
+h4{font-size:1.25rem;margin:22px 0 8px}
+.serv{display:flex;align-items:center;gap:10px;color:var(--muted)}
+.serv button{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:800;font-size:1.1rem}
+.serv b{color:var(--ink);min-width:1.5ch;text-align:center}
+.ing{list-style:none;padding:0;margin:0}
+.ing li{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ing .amt{flex:0 0 96px;font-weight:700}
+.steps{list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{display:flex;gap:12px;margin-bottom:14px}
+.steps li::before{counter-increment:s;content:counter(s);flex:0 0 30px;height:30px;border-radius:50%;background:var(--green);color:var(--on-green);display:grid;place-items:center;font-weight:800}
+.steps b{display:block}
+.steps p{margin:2px 0 0;color:var(--muted)}
+.note{color:var(--muted);font-size:.82rem;margin-top:18px}
+.erow{display:grid;grid-template-columns:64px 72px 1fr 36px;gap:6px;margin-bottom:6px}
+.erow .input{padding:9px 8px}
+.srow{display:grid;grid-template-columns:1fr 36px;gap:6px;margin-bottom:10px}
+.del{border:none;background:var(--surface2);border-radius:10px;font-weight:800}
+label.l{display:block;font-weight:600;font-size:.9rem;margin:12px 0 4px}
+.day{background:var(--surface);border-radius:16px;padding:10px 14px;margin-bottom:12px}
+.day-h{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:1.1rem;margin:2px 0 4px}
+.day-h span{font-weight:600;font-size:.85rem;color:var(--muted)}
+.today{color:var(--gold);font-size:.8rem;margin-left:6px}
+.meal{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:8px 0}
+.meal button.open{flex:1;text-align:left;background:none;border:none;padding:0}
+.meal small{display:block;color:var(--muted);font-size:.78rem}
+.meal .ib{border:none;background:var(--surface2);border-radius:8px;width:34px;height:34px;font-weight:700}
+.addmeal{margin-top:6px;width:100%}
+.shop{display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;border-bottom:1px solid var(--line);padding:11px 2px;text-align:left}
+.chk{flex:0 0 24px;height:24px;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center;font-size:.8rem;font-weight:800}
+.shop.done .chk{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.shop.done .nm{text-decoration:line-through;color:var(--muted)}
+.shop .am{margin-left:auto;font-weight:700;color:var(--muted);white-space:nowrap}
+.shop small{display:block;color:var(--muted);font-size:.75rem}
+/* Kochmodus */
+#cook .sheet{display:flex;flex-direction:column;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.prog{height:6px;border-radius:3px;background:var(--green-soft);overflow:hidden;margin-bottom:8px}
+.prog i{display:block;height:100%;background:var(--green);transition:width .25s}
+.cook-page{flex:1;overflow-y:auto;padding:8px 2px}
+.cook-step{color:var(--green);font-weight:700}
+.cook-title{font-size:2rem;font-weight:800;line-height:1.15;margin:6px 0 10px}
+.cook-text{font-size:1.6rem;line-height:1.4}
+.cook-ing{list-style:none;padding:0;margin:8px 0 0}
+.cook-ing button{display:flex;gap:12px;align-items:baseline;width:100%;text-align:left;background:none;border:none;padding:10px 0;font-size:1.35rem;border-bottom:1px solid var(--line)}
+.cook-ing button.done{color:var(--muted);text-decoration:line-through}
+.timers{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.tmr{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:12px;padding:10px 12px}
+.tmr.ring{background:var(--gold);color:#1a1a1a;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.7}}
+@media (prefers-reduced-motion:reduce){.tmr.ring{animation:none}}
+.tmr .lbl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tmr .t{font-weight:800;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.cook-nav{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<button class="timerpill" id="timerpill" hidden></button>
+<nav class="tabbar" aria-label="Hauptnavigation"><div class="in" id="tabs"></div></nav>
+<dialog id="sheet" aria-label="Details"><div class="sheet" id="sheetBody"></div></dialog>
+<dialog id="cook" aria-label="Kochmodus"><div class="sheet" id="cookBody"></div></dialog>
+
+<script>
+const BASE = [
+{"id": "overnight-oats-mit-beeren", "cat": "fruehstueck", "ty": "veggie", "kcal": 300, "t": "5 Min. + über Nacht", "name": "Overnight Oats mit Beeren", "g": [["Zutaten", [[40, "g", "Haferflocken"], [150, "g", "Magerjoghurt oder Skyr"], [50, "ml", "Milch"], [1, "Handvoll", "Beeren"], [1, "TL", "Chiasamen"]]]], "s": [["Vorbereiten", "Ein verschließbares Glas oder eine Schüssel (ca. 400 ml) bereitstellen. Haferflocken, Joghurt bzw. Skyr und Milch hineingeben."], ["Verrühren", "Alles gründlich verrühren, bis keine trockenen Haferflocken mehr zu sehen sind. Die Masse sollte noch etwas flüssiger sein als gewünscht, da die Flocken quellen."], ["Quellen lassen", "Das Glas verschließen und über Nacht, mindestens aber 4 Stunden, in den Kühlschrank stellen."], ["Toppen", "Morgens einmal umrühren. Ist es zu fest, 1–2 EL Milch unterrühren. Beeren waschen, abtropfen lassen und mit den Chiasamen darauf verteilen."], ["Tipp", "Hält sich im Kühlschrank bis zu 2 Tage. Ideal zum Mitnehmen ins Büro."]]},
+{"id": "gemuese-omelett", "cat": "fruehstueck", "ty": "veggie", "kcal": 250, "t": "10 Min.", "name": "Gemüse-Omelett", "g": [["Zutaten", [[2, "", "Eier"], [1, "Handvoll", "Spinat"], [0.25, "", "Paprika"], [0.5, "", "Tomate"], [0.25, "", "Zwiebel"], [1, "TL", "Öl"], [null, "", "Salz, Pfeffer, Kräuter"]]]], "s": [["Gemüse schneiden", "Zwiebel fein würfeln, Paprika in kleine Würfel schneiden, Tomate entkernen und würfeln. Spinat waschen und gut abtropfen lassen."], ["Eier verquirlen", "Eier in einer Schüssel mit einer Gabel kräftig verquirlen und mit Salz und Pfeffer würzen."], ["Anbraten", "Öl in einer beschichteten Pfanne (ca. 20 cm) bei mittlerer Hitze erwärmen. Zwiebel und Paprika 2–3 Minuten andünsten, dann Tomate und Spinat zugeben und rühren, bis der Spinat zusammenfällt."], ["Stocken lassen", "Gemüse gleichmäßig verteilen und die Eier darübergießen. Bei mittlerer bis niedriger Hitze 4–5 Minuten stocken lassen, ohne zu rühren. Mit einem Deckel geht es schneller."], ["Servieren", "Wenn die Oberfläche fast fest ist, Omelett mit dem Pfannenwender zusammenklappen, auf einen Teller gleiten lassen und mit frischen Kräutern bestreuen."]]},
+{"id": "skyr-bowl-mit-apfel-und-zimt", "cat": "fruehstueck", "ty": "veggie", "kcal": 250, "t": "5 Min.", "name": "Skyr-Bowl mit Apfel und Zimt", "g": [["Zutaten", [[200, "g", "Skyr"], [0.5, "", "Apfel"], [0.5, "TL", "Zimt"], [3, "", "Walnusshälften"]]]], "s": [["Skyr cremig rühren", "Skyr in eine Schale geben und kurz glatt rühren. Ist er sehr fest, 1–2 EL Wasser oder Milch unterrühren."], ["Apfel vorbereiten", "Apfel waschen, entkernen und in kleine Würfel schneiden. Die Schale bleibt dran, sie liefert Ballaststoffe."], ["Walnüsse rösten", "Walnüsse grob hacken und in einer Pfanne ohne Fett 2 Minuten anrösten, bis sie duften. Das macht sie aromatischer."], ["Anrichten", "Apfelwürfel auf dem Skyr verteilen, mit Zimt bestäuben und die Walnüsse darüberstreuen."]]},
+{"id": "vollkornbrot-mit-huettenkaese", "cat": "fruehstueck", "ty": "veggie", "kcal": 280, "t": "5 Min.", "name": "Vollkornbrot mit Hüttenkäse", "g": [["Zutaten", [[2, "Scheiben", "Vollkornbrot"], [100, "g", "körniger Frischkäse (Hüttenkäse)"], [0.25, "", "Gurke"], [3, "", "Radieschen"], [null, "", "Schnittlauch, Pfeffer"]]]], "s": [["Brot vorbereiten", "Vollkornbrot nach Wunsch kurz toasten, dann wird es knuspriger und hält den Belag besser."], ["Gemüse schneiden", "Gurke und Radieschen waschen und in dünne Scheiben schneiden. Schnittlauch in feine Röllchen schneiden."], ["Bestreichen", "Hüttenkäse gleichmäßig auf beide Brotscheiben verteilen."], ["Belegen und würzen", "Gurken- und Radieschenscheiben dachziegelartig darauflegen, mit Schnittlauch bestreuen und mit frisch gemahlenem Pfeffer würzen."]]},
+{"id": "gruener-smoothie", "cat": "fruehstueck", "ty": "veggie", "kcal": 200, "t": "5 Min.", "name": "Grüner Smoothie", "g": [["Zutaten", [[1, "Handvoll", "Spinat"], [0.5, "", "Banane"], [50, "g", "Ananas"], [150, "ml", "Mandelmilch (ungesüßt)"], [1, "EL", "Haferflocken"]]]], "s": [["Zutaten vorbereiten", "Spinat gründlich waschen. Banane schälen und in Stücke brechen. Ananas schälen und würfeln (oder TK-Ananas verwenden)."], ["Einfüllen", "Zuerst die Mandelmilch in den Mixer geben, dann Spinat, Banane, Ananas und Haferflocken. So läuft der Mixer leichter an."], ["Mixen", "Auf höchster Stufe 30–60 Sekunden pürieren, bis keine Spinatstückchen mehr zu sehen sind."], ["Anpassen", "Zu dick? Etwas Wasser zugeben und kurz nachmixen. Für einen kühlen Smoothie gefrorene Banane oder ein paar Eiswürfel verwenden. Sofort trinken."]]},
+{"id": "ruehrei-mit-avocado-toast", "cat": "fruehstueck", "ty": "veggie", "kcal": 350, "t": "10 Min.", "name": "Rührei mit Avocado-Toast", "g": [["Zutaten", [[1, "Scheibe", "Vollkorntoast"], [0.25, "", "Avocado"], [2, "", "Eier"], [5, "", "Kirschtomaten"], [null, "", "Salz, Pfeffer, Chiliflocken"]]]], "s": [["Toast rösten", "Vollkorntoast im Toaster goldbraun rösten."], ["Avocado zerdrücken", "Avocado mit einem Löffel aus der Schale lösen, mit einer Gabel grob zerdrücken und mit Salz, Pfeffer und nach Wunsch einem Spritzer Zitrone würzen. Auf den Toast streichen."], ["Rührei zubereiten", "Eier verquirlen und leicht salzen. In eine beschichtete Pfanne bei niedriger bis mittlerer Hitze geben und mit einem Pfannenwender langsam zur Mitte schieben, bis cremige Flocken entstehen. Nach ca. 2–3 Minuten vom Herd nehmen, solange es noch leicht feucht ist."], ["Anrichten", "Rührei auf dem Avocado-Toast verteilen, mit Chiliflocken bestreuen. Kirschtomaten halbieren und dazu servieren."]]},
+{"id": "chia-pudding-mit-mango", "cat": "fruehstueck", "ty": "veggie", "kcal": 220, "t": "5 Min. + 2 Std.", "name": "Chia-Pudding mit Mango", "g": [["Zutaten", [[2, "EL", "Chiasamen"], [200, "ml", "Pflanzenmilch (ungesüßt)"], [50, "g", "Mango oder Beeren"]]]], "s": [["Anrühren", "Chiasamen und Pflanzenmilch in einem Glas gründlich verrühren."], ["Nachrühren", "Nach 10 Minuten noch einmal kräftig umrühren. So bilden sich keine Klümpchen am Boden."], ["Quellen lassen", "Abgedeckt mindestens 2 Stunden oder über Nacht in den Kühlschrank stellen, bis eine puddingartige Konsistenz entsteht."], ["Obst vorbereiten", "Mango schälen, vom Kern schneiden und würfeln oder Beeren waschen."], ["Servieren", "Pudding umrühren (bei Bedarf 1–2 EL Milch zugeben) und mit dem Obst toppen."]]},
+{"id": "haehnchen-gemuese-pfanne", "cat": "mittag", "ty": "haehnchen", "kcal": 400, "t": "20 Min.", "name": "Hähnchen-Gemüse-Pfanne", "g": [["Zutaten", [[150, "g", "Hähnchenbrust"], [1, "", "Zucchini"], [1, "", "Paprika"], [100, "g", "Brokkoli"], [1, "TL", "Öl"], [1, "EL", "Sojasauce"], [null, "", "Knoblauch, Ingwer"]]]], "s": [["Vorbereiten", "Hähnchenbrust trocken tupfen und in dünne Streifen schneiden. Zucchini halbieren und in Scheiben schneiden, Paprika in Streifen, Brokkoli in kleine Röschen teilen. Knoblauch und Ingwer fein hacken."], ["Hähnchen anbraten", "Öl in einer großen Pfanne oder einem Wok stark erhitzen. Hähnchen 3–4 Minuten rundherum goldbraun braten, bis es durchgegart ist. Herausnehmen."], ["Gemüse braten", "Brokkoli in die Pfanne geben, 2 EL Wasser zugeben und 2 Minuten zugedeckt dämpfen. Zucchini, Paprika, Knoblauch und Ingwer zufügen und 4–5 Minuten unter Rühren bissfest braten."], ["Abschmecken", "Hähnchen zurück in die Pfanne geben, mit Sojasauce ablöschen, alles gut durchschwenken und mit Pfeffer abschmecken."]]},
+{"id": "linsensuppe", "cat": "mittag", "ty": "veggie", "kcal": 350, "t": "30 Min.", "name": "Linsensuppe", "g": [["Zutaten", [[60, "g", "rote Linsen"], [1, "", "Karotte"], [0.5, "", "Zwiebel"], [200, "g", "gehackte Tomaten"], [300, "ml", "Gemüsebrühe"], [null, "", "Kreuzkümmel, Paprikapulver"]]]], "s": [["Gemüse schneiden", "Zwiebel und Karotte schälen und klein würfeln."], ["Andünsten", "In einem Topf mit einem Schuss Brühe (oder etwas Öl) 3 Minuten andünsten. Kreuzkümmel und Paprikapulver zugeben und kurz mitrösten."], ["Linsen zugeben", "Linsen in einem Sieb abspülen und mit Tomaten und Gemüsebrühe in den Topf geben. Aufkochen lassen."], ["Köcheln", "Bei mittlerer Hitze 15–20 Minuten köcheln lassen, bis die Linsen weich sind und zerfallen. Gelegentlich umrühren."], ["Fertigstellen", "Nach Wunsch mit dem Stabmixer ganz oder teilweise pürieren. Mit Salz, Pfeffer und einem Spritzer Zitronensaft abschmecken."]]},
+{"id": "quinoa-salat-mit-feta", "cat": "mittag", "ty": "veggie", "kcal": 420, "t": "20 Min.", "name": "Quinoa-Salat mit Feta", "g": [["Zutaten", [[50, "g", "Quinoa"], [0.5, "", "Gurke"], [8, "", "Kirschtomaten"], [30, "g", "Feta"], [1, "TL", "Olivenöl"], [null, "", "Zitronensaft, Petersilie"]]]], "s": [["Quinoa waschen", "Quinoa in einem feinen Sieb gründlich unter kaltem Wasser abspülen, um Bitterstoffe zu entfernen."], ["Kochen", "Mit der doppelten Menge Wasser und einer Prise Salz aufkochen, dann zugedeckt bei niedriger Hitze 12–15 Minuten garen, bis das Wasser aufgesogen ist. Abkühlen lassen."], ["Gemüse schneiden", "Gurke würfeln, Kirschtomaten halbieren, Petersilie fein hacken."], ["Dressing", "Olivenöl mit Zitronensaft, Salz und Pfeffer verrühren."], ["Mischen", "Quinoa, Gemüse und Petersilie mit dem Dressing vermengen und den Feta darüberbröseln. Schmeckt auch am nächsten Tag noch."]]},
+{"id": "lachs-mit-ofengemuese", "cat": "mittag", "ty": "fisch", "kcal": 450, "t": "30 Min.", "name": "Lachs mit Ofengemüse", "g": [["Zutaten", [[120, "g", "Lachsfilet"], [150, "g", "grüne Bohnen oder Spargel"], [100, "g", "Kirschtomaten"], [1, "TL", "Olivenöl"], [null, "", "Zitrone, Dill, Salz, Pfeffer"]]]], "s": [["Ofen vorheizen", "Backofen auf 200 °C Ober-/Unterhitze vorheizen. Ein Blech mit Backpapier auslegen."], ["Gemüse vorbereiten", "Grüne Bohnen putzen (bzw. Spargel schälen und holzige Enden abschneiden). Mit Kirschtomaten, Olivenöl, Salz und Pfeffer mischen und auf dem Blech verteilen."], ["Vorgaren", "Gemüse 8 Minuten im Ofen vorgaren."], ["Lachs dazulegen", "Lachs trocken tupfen, salzen, pfeffern und auf das Gemüse legen. Mit Zitronenscheiben und Dill belegen."], ["Fertig backen", "Alles weitere 12–15 Minuten backen, bis der Lachs sich leicht mit der Gabel zerteilen lässt und innen noch saftig ist."]]},
+{"id": "zucchini-nudeln-mit-tomatensauce", "cat": "mittag", "ty": "veggie", "kcal": 300, "t": "15 Min.", "name": "Zucchini-Nudeln mit Tomatensauce", "g": [["Zutaten", [[2, "", "Zucchini"], [200, "g", "passierte Tomaten"], [1, "", "Knoblauchzehe"], [100, "g", "Hüttenkäse (oder 20 g Parmesan)"], [null, "", "Basilikum, Oregano"]]]], "s": [["Sauce ansetzen", "Knoblauch fein hacken und mit den passierten Tomaten, Oregano, Salz und Pfeffer in einem kleinen Topf aufkochen. Bei niedriger Hitze 8–10 Minuten köcheln lassen."], ["Zucchini-Nudeln schneiden", "Zucchini waschen, Enden abschneiden und mit einem Spiralschneider zu Nudeln drehen. Wer keinen hat, nimmt einen Sparschäler für breite Bandnudeln."], ["Kurz braten", "Zucchini-Nudeln in einer beschichteten Pfanne ohne Fett 2 Minuten bei hoher Hitze schwenken. Nicht länger, sonst werden sie weich und wässrig."], ["Anrichten", "Nudeln auf einen Teller geben, Sauce darüber verteilen, Hüttenkäse oder Parmesan darauf und mit frischem Basilikum bestreuen."]]},
+{"id": "kichererbsen-bowl", "cat": "mittag", "ty": "veggie", "kcal": 420, "t": "15 Min.", "name": "Kichererbsen-Bowl", "g": [["Zutaten", [[120, "g", "Kichererbsen (Dose)"], [1, "Handvoll", "Blattsalat"], [0.5, "", "Paprika"], [0.25, "", "Gurke"], [2, "EL", "Hummus"], [null, "", "Paprikapulver, Zitronensaft"]]]], "s": [["Kichererbsen vorbereiten", "Kichererbsen in ein Sieb geben, gründlich abspülen und mit Küchenpapier trocken tupfen."], ["Rösten", "In einer beschichteten Pfanne bei mittlerer bis hoher Hitze 5–6 Minuten rösten, bis sie leicht knusprig sind. Mit Paprikapulver und Salz würzen."], ["Gemüse schneiden", "Salat waschen und trocken schleudern. Paprika in Streifen, Gurke in Scheiben schneiden."], ["Anrichten", "Salat und Gemüse in eine Schüssel geben, Kichererbsen darauf verteilen und den Hummus in die Mitte setzen."], ["Würzen", "Mit Zitronensaft beträufeln und mit Pfeffer abschmecken. Der Hummus dient gleichzeitig als Dressing."]]},
+{"id": "putenwrap-mit-salat", "cat": "mittag", "ty": "pute", "kcal": 380, "t": "10 Min.", "name": "Putenwrap mit Salat", "g": [["Zutaten", [[1, "", "Vollkorn-Tortilla"], [80, "g", "Putenbrust (gebraten oder Aufschnitt)"], [null, "", "Salatblätter, Tomate, Gurke"], [2, "EL", "Joghurt-Kräuter-Dip"]]]], "s": [["Pute vorbereiten", "Falls frische Putenbrust: in einer beschichteten Pfanne 3–4 Minuten pro Seite braten, salzen, pfeffern und in Streifen schneiden. Aufschnitt einfach in Streifen schneiden."], ["Gemüse schneiden", "Salat waschen und trocknen, Tomate und Gurke in dünne Scheiben schneiden."], ["Tortilla erwärmen", "Tortilla in einer Pfanne ohne Fett ca. 20 Sekunden pro Seite erwärmen. So reißt sie beim Rollen nicht."], ["Belegen", "Tortilla mit dem Dip bestreichen, dabei rundherum 2 cm Rand lassen. Salat, Gemüse und Pute im unteren Drittel verteilen."], ["Rollen", "Seiten einschlagen, dann von unten fest aufrollen. Schräg halbieren. Zum Mitnehmen in Backpapier oder Alufolie wickeln."]]},
+{"id": "gemuesesticks-mit-kraeuterquark", "cat": "snack", "ty": "veggie", "kcal": 130, "t": "10 Min.", "name": "Gemüsesticks mit Kräuterquark", "g": [["Zutaten", [[1, "", "Karotte"], [0.5, "", "Gurke"], [0.5, "", "Paprika"], [100, "g", "Magerquark"], [1, "EL", "Mineralwasser"], [null, "", "Kräuter, Salz, Pfeffer"]]]], "s": [["Gemüse schneiden", "Karotte schälen, Gurke und Paprika waschen. Alles in fingerdicke Sticks schneiden."], ["Quark anrühren", "Magerquark mit dem Mineralwasser cremig rühren. Durch die Kohlensäure wird er schön luftig."], ["Würzen", "Kräuter fein hacken und unterheben, mit Salz und Pfeffer abschmecken."], ["Servieren", "Quark in ein Schälchen füllen und die Gemüsesticks dazu stellen. Zum Mitnehmen alles in eine Dose mit Deckel geben."]]},
+{"id": "apfelspalten-mit-erdnussmus", "cat": "snack", "ty": "veggie", "kcal": 180, "t": "3 Min.", "name": "Apfelspalten mit Erdnussmus", "g": [["Zutaten", [[1, "", "Apfel"], [1, "EL", "Erdnussmus (ohne Zucker)"]]]], "s": [["Apfel schneiden", "Apfel waschen, vierteln, das Kerngehäuse entfernen und in Spalten schneiden."], ["Braun werden verhindern", "Wer die Spalten mitnehmen möchte, beträufelt sie mit etwas Zitronensaft."], ["Dip vorbereiten", "Erdnussmus in ein kleines Schälchen geben und glatt rühren. Ist es zu fest, kurz mit 1 TL warmem Wasser verrühren."], ["Genießen", "Apfelspalten in das Erdnussmus dippen. Wer mag, bestreut alles mit einer Prise Zimt."]]},
+{"id": "knusprige-ofen-kichererbsen", "cat": "snack", "ty": "veggie", "kcal": 140, "t": "30 Min.", "name": "Knusprige Ofen-Kichererbsen", "g": [["Zutaten", [[100, "g", "Kichererbsen (Dose, abgetropft)"], [0.5, "TL", "Olivenöl"], [0.5, "TL", "Paprikapulver"], [null, "", "Salz"]]]], "s": [["Ofen vorheizen", "Backofen auf 200 °C Umluft vorheizen und ein Blech mit Backpapier auslegen."], ["Trocknen", "Kichererbsen abspülen und sehr gründlich mit Küchenpapier trocken tupfen. Lose Häutchen entfernen. Je trockener, desto knuspriger."], ["Würzen", "Mit Olivenöl, Paprikapulver und Salz in einer Schüssel mischen."], ["Rösten", "In einer Lage auf dem Blech verteilen und ca. 25 Minuten rösten. Nach der Hälfte der Zeit einmal durchschütteln."], ["Abkühlen lassen", "Auf dem Blech abkühlen lassen, dabei werden sie noch knuspriger. Am selben Tag essen."]]},
+{"id": "edamame-mit-meersalz", "cat": "snack", "ty": "veggie", "kcal": 125, "t": "6 Min.", "name": "Edamame mit Meersalz", "g": [["Zutaten", [[100, "g", "Edamame (TK, geschält)"], [null, "", "Meersalz, etwas Chili"]]]], "s": [["Wasser aufkochen", "Reichlich Wasser in einem Topf mit 1 TL Salz zum Kochen bringen."], ["Kochen", "Gefrorene Edamame hineingeben und 4–5 Minuten kochen lassen."], ["Abgießen", "In ein Sieb abgießen und kurz abtropfen lassen."], ["Würzen", "Noch warm in eine Schale geben, mit grobem Meersalz und nach Wunsch etwas Chili bestreuen und durchschwenken."]]},
+{"id": "joghurt-mit-beeren-und-mandeln", "cat": "snack", "ty": "veggie", "kcal": 170, "t": "3 Min.", "name": "Joghurt mit Beeren und Mandeln", "g": [["Zutaten", [[150, "g", "Naturjoghurt (1,5 %)"], [80, "g", "Beeren"], [10, "g", "Mandeln (gehackt)"]]]], "s": [["Mandeln rösten", "Gehackte Mandeln in einer Pfanne ohne Fett bei mittlerer Hitze 2 Minuten goldbraun rösten. Dabei ständig rühren, sie verbrennen schnell."], ["Beeren vorbereiten", "Beeren waschen und abtropfen lassen. Große Erdbeeren halbieren."], ["Anrichten", "Joghurt in eine Schale geben, Beeren darauf verteilen und mit den Mandeln bestreuen."]]},
+{"id": "reiswaffeln-mit-huettenkaese-und-tomate", "cat": "snack", "ty": "veggie", "kcal": 130, "t": "3 Min.", "name": "Reiswaffeln mit Hüttenkäse und Tomate", "g": [["Zutaten", [[2, "", "Reiswaffeln"], [60, "g", "Hüttenkäse"], [1, "", "kleine Tomate"], [null, "", "Pfeffer, Schnittlauch"]]]], "s": [["Tomate schneiden", "Tomate waschen und in dünne Scheiben schneiden."], ["Bestreichen", "Hüttenkäse gleichmäßig auf die Reiswaffeln verteilen. Erst kurz vor dem Essen bestreichen, damit sie knusprig bleiben."], ["Belegen", "Tomatenscheiben darauflegen."], ["Würzen", "Mit Pfeffer und Schnittlauchröllchen bestreuen. Eine Prise Salz rundet es ab."]]},
+{"id": "gekochte-eier-mit-kirschtomaten", "cat": "snack", "ty": "veggie", "kcal": 170, "t": "10 Min.", "name": "Gekochte Eier mit Kirschtomaten", "g": [["Zutaten", [[2, "", "Eier"], [5, "", "Kirschtomaten"], [null, "", "Salz, Pfeffer"]]]], "s": [["Wasser aufkochen", "In einem kleinen Topf so viel Wasser zum Kochen bringen, dass die Eier bedeckt sind."], ["Eier kochen", "Eier am stumpfen Ende anstechen und mit einem Löffel vorsichtig ins kochende Wasser legen. 8–9 Minuten kochen lassen."], ["Abschrecken", "Eier herausnehmen und sofort in kaltes Wasser legen. So lassen sie sich leichter schälen."], ["Servieren", "Schälen, halbieren, mit Salz und Pfeffer würzen und mit den Kirschtomaten servieren. Ungeschält halten sich die Eier im Kühlschrank bis zu 5 Tage."]]},
+{"id": "herzhafter-kraeuterquark-mit-knaeckebrot", "cat": "fruehstueck", "ty": "veggie", "kcal": 200, "t": "5 Min.", "name": "Herzhafter Kräuterquark mit Knäckebrot", "g": [["Zutaten", [[150, "g", "Magerquark"], [1, "", "Tomate"], [0.25, "", "Gurke"], [2, "Scheiben", "Vollkorn-Knäckebrot"], [null, "", "Schnittlauch, Salz, Pfeffer"]]]], "s": [["Quark anrühren", "Magerquark mit 1–2 EL Wasser oder Mineralwasser cremig rühren."], ["Würzen", "Schnittlauch in feine Röllchen schneiden und unterheben. Mit Salz und Pfeffer abschmecken. Nach Wunsch etwas Knoblauch oder Paprikapulver dazugeben."], ["Gemüse schneiden", "Tomate und Gurke waschen und in Scheiben oder Stifte schneiden."], ["Servieren", "Quark auf die Knäckebrote streichen oder separat als Dip servieren und mit dem Gemüse belegen."]]},
+{"id": "porridge-mit-apfel-und-zimt", "cat": "fruehstueck", "ty": "veggie", "kcal": 290, "t": "10 Min.", "name": "Porridge mit Apfel und Zimt", "g": [["Zutaten", [[40, "g", "Haferflocken"], [200, "ml", "Milch (1,5 %)"], [0.5, "", "Apfel"], [0.5, "TL", "Zimt"]]]], "s": [["Aufkochen", "Haferflocken und Milch in einem kleinen Topf mit einer Prise Salz verrühren und unter Rühren aufkochen."], ["Köcheln", "Hitze reduzieren und das Porridge 3–4 Minuten unter häufigem Rühren köcheln lassen, bis es cremig ist. Bei Bedarf einen Schluck Milch nachgießen."], ["Apfel vorbereiten", "Währenddessen den Apfel waschen, entkernen und würfeln. Wer mag, dünstet die Würfel 2 Minuten mit einem Schluck Wasser und Zimt in einer Pfanne an."], ["Servieren", "Porridge in eine Schale füllen, Apfel darauf verteilen und mit Zimt bestäuben."]]},
+{"id": "bircher-muesli", "cat": "fruehstueck", "ty": "veggie", "kcal": 260, "t": "5 Min. + 1 Std.", "name": "Bircher-Müsli", "g": [["Zutaten", [[30, "g", "Haferflocken"], [100, "g", "Naturjoghurt (1,5 %)"], [50, "ml", "Milch (1,5 %)"], [0.5, "", "Apfel"], [1, "TL", "Zitronensaft"], [5, "g", "Haselnüsse (gehackt)"]]]], "s": [["Einweichen", "Haferflocken mit Joghurt und Milch in einer Schüssel verrühren."], ["Quellen lassen", "Abgedeckt mindestens 1 Stunde, am besten über Nacht, in den Kühlschrank stellen."], ["Apfel reiben", "Kurz vor dem Servieren den Apfel waschen und mit Schale grob reiben. Sofort mit dem Zitronensaft mischen, damit er nicht braun wird."], ["Fertigstellen", "Geriebenen Apfel unter das Müsli heben. Haselnüsse in einer Pfanne ohne Fett kurz anrösten und darüberstreuen."]]},
+{"id": "protein-pfannkuchen-mit-beeren", "cat": "fruehstueck", "ty": "veggie", "kcal": 240, "t": "15 Min.", "name": "Protein-Pfannkuchen mit Beeren", "g": [["Zutaten", [[1, "", "Ei"], [50, "g", "Magerquark"], [20, "g", "zarte Haferflocken"], [80, "g", "Beeren"], [0.5, "TL", "Rapsöl"]]]], "s": [["Teig anrühren", "Ei, Magerquark und Haferflocken in einer Schüssel glatt verrühren. Nach Wunsch eine Prise Zimt oder etwas Vanille zugeben."], ["Quellen lassen", "Teig 5 Minuten ruhen lassen, damit die Haferflocken etwas Flüssigkeit aufnehmen."], ["Pfanne vorbereiten", "Eine beschichtete Pfanne bei mittlerer Hitze erwärmen und mit dem Öl dünn auspinseln."], ["Ausbacken", "Je 1–2 EL Teig pro Pfannkuchen in die Pfanne geben und 2–3 Minuten backen, bis die Unterseite goldbraun ist und sich Bläschen zeigen. Wenden und weitere 1–2 Minuten backen."], ["Servieren", "Beeren waschen und zu den Pfannkuchen servieren. Ein Klecks Joghurt passt gut dazu."]]},
+{"id": "shakshuka-fuer-eine-person", "cat": "fruehstueck", "ty": "veggie", "kcal": 260, "t": "20 Min.", "name": "Shakshuka für eine Person", "g": [["Zutaten", [[2, "", "Eier"], [200, "g", "gehackte Tomaten (Dose)"], [0.5, "", "Paprika"], [0.25, "", "Zwiebel"], [1, "TL", "Olivenöl"], [null, "", "Kreuzkümmel, Paprikapulver, Salz, Petersilie"]]]], "s": [["Gemüse andünsten", "Zwiebel und Paprika fein würfeln. Öl in einer kleinen Pfanne (ca. 20 cm) erhitzen und das Gemüse bei mittlerer Hitze 3 Minuten glasig dünsten."], ["Gewürze rösten", "Kreuzkümmel und Paprikapulver zugeben und 30 Sekunden mitrösten, bis es duftet."], ["Sauce köcheln", "Gehackte Tomaten zugeben, salzen und 5 Minuten offen köcheln lassen, bis die Sauce etwas eindickt."], ["Eier garen", "Mit einem Löffel zwei Mulden in die Sauce drücken und je ein Ei hineinschlagen. Deckel auflegen und bei niedriger Hitze 6–8 Minuten stocken lassen, bis das Eiweiß fest und das Eigelb noch weich ist."], ["Servieren", "Mit Pfeffer und gehackter Petersilie bestreuen und direkt aus der Pfanne essen."]]},
+{"id": "joghurt-bowl-mit-kiwi-und-leinsamen", "cat": "fruehstueck", "ty": "veggie", "kcal": 220, "t": "5 Min.", "name": "Joghurt-Bowl mit Kiwi und Leinsamen", "g": [["Zutaten", [[150, "g", "Naturjoghurt (1,5 %)"], [1, "", "Kiwi"], [1, "EL", "geschrotete Leinsamen"], [15, "g", "zarte Haferflocken"]]]], "s": [["Haferflocken rösten", "Haferflocken in einer Pfanne ohne Fett bei mittlerer Hitze 2 Minuten goldbraun rösten. Das gibt ein nussiges Aroma."], ["Kiwi vorbereiten", "Kiwi schälen und in Scheiben oder Würfel schneiden."], ["Anrichten", "Joghurt in eine Schale geben, glatt streichen und Kiwi, Haferflocken und Leinsamen darauf verteilen."], ["Tipp", "Geschrotete Leinsamen kann der Körper besser verwerten als ganze. Am besten luftdicht im Kühlschrank lagern."]]},
+{"id": "vollkornbrot-mit-raeucherlachs-und-gurke", "cat": "fruehstueck", "ty": "fisch", "kcal": 220, "t": "5 Min.", "name": "Vollkornbrot mit Räucherlachs und Gurke", "g": [["Zutaten", [[1, "Scheibe", "Vollkornbrot (ca. 50 g)"], [20, "g", "Frischkäse light"], [40, "g", "Räucherlachs"], [0.25, "", "Gurke"], [null, "", "Dill, Pfeffer"]]]], "s": [["Gurke vorbereiten", "Gurke waschen und in dünne Scheiben schneiden oder hobeln."], ["Bestreichen", "Vollkornbrot nach Wunsch kurz toasten und mit dem Frischkäse bestreichen."], ["Belegen", "Gurkenscheiben auf den Frischkäse legen, Räucherlachs locker darauf verteilen."], ["Würzen", "Mit frischem Dill und Pfeffer bestreuen. Ein Spritzer Zitrone rundet es ab."]]},
+{"id": "caprese-mit-rucola-und-vollkornbrot", "cat": "mittag", "ty": "veggie", "kcal": 410, "t": "10 Min.", "name": "Caprese mit Rucola und Vollkornbrot", "g": [["Zutaten", [[125, "g", "Mozzarella light"], [2, "", "Tomaten"], [1, "Handvoll", "Rucola"], [1, "TL", "Olivenöl"], [1, "TL", "Balsamico"], [1, "Scheibe", "Vollkornbrot"], [null, "", "Basilikum, Salz, Pfeffer"]]]], "s": [["Vorbereiten", "Rucola waschen und trocken schleudern. Tomaten und Mozzarella in etwa 0,5 cm dicke Scheiben schneiden. Mozzarella gut abtropfen lassen."], ["Anrichten", "Rucola auf einem Teller verteilen. Tomaten- und Mozzarellascheiben abwechselnd daraufschichten."], ["Würzen", "Mit Salz und Pfeffer würzen, mit Olivenöl und Balsamico beträufeln und mit frischen Basilikumblättern belegen."], ["Brot dazu", "Vollkornbrot kurz toasten und dazu servieren."]]},
+{"id": "thunfisch-bohnen-salat", "cat": "mittag", "ty": "fisch", "kcal": 270, "t": "10 Min.", "name": "Thunfisch-Bohnen-Salat", "g": [["Zutaten", [[80, "g", "Thunfisch im eigenen Saft (abgetropft)"], [100, "g", "weiße Bohnen (Dose, abgetropft)"], [0.5, "", "rote Zwiebel"], [6, "", "Kirschtomaten"], [1, "TL", "Olivenöl"], [null, "", "Zitronensaft, Petersilie, Salz, Pfeffer"]]]], "s": [["Abtropfen", "Weiße Bohnen in einem Sieb abspülen und gut abtropfen lassen. Thunfisch abtropfen lassen."], ["Schneiden", "Rote Zwiebel in feine Ringe oder Würfel schneiden, Kirschtomaten halbieren, Petersilie hacken."], ["Dressing", "Olivenöl mit Zitronensaft, Salz und Pfeffer verrühren."], ["Mischen", "Bohnen, Zwiebel und Tomaten mit dem Dressing mischen. Thunfisch grob zerpflücken und vorsichtig unterheben, mit Petersilie bestreuen."], ["Ziehen lassen", "Den Salat 5–10 Minuten ziehen lassen, dann schmeckt er intensiver. Gut zum Mitnehmen."]]},
+{"id": "puten-gemuese-reispfanne", "cat": "mittag", "ty": "pute", "kcal": 370, "t": "25 Min.", "name": "Puten-Gemüse-Reispfanne", "g": [["Zutaten", [[100, "g", "Putenbrust"], [40, "g", "Vollkornreis (roh)"], [0.5, "", "Zucchini"], [0.5, "", "Paprika"], [50, "g", "Erbsen (TK)"], [1, "TL", "Öl"], [1, "EL", "Sojasauce"]]]], "s": [["Reis kochen", "Vollkornreis nach Packungsanweisung in Salzwasser garen (meist ca. 25 Minuten). Abgießen. Tipp: Reis vom Vortag funktioniert besonders gut."], ["Vorbereiten", "Putenbrust in Streifen schneiden. Zucchini und Paprika würfeln."], ["Fleisch braten", "Öl in einer großen Pfanne erhitzen und die Pute 3–4 Minuten rundherum anbraten, bis sie durch ist. Herausnehmen."], ["Gemüse braten", "Zucchini und Paprika 3 Minuten braten, Erbsen zugeben und weitere 2 Minuten mitbraten."], ["Fertigstellen", "Reis und Pute zugeben, alles gut vermengen, mit Sojasauce und Pfeffer abschmecken und 1–2 Minuten durchbraten."]]},
+{"id": "ofen-suesskartoffel-mit-kraeuterquark", "cat": "mittag", "ty": "veggie", "kcal": 310, "t": "45 Min.", "name": "Ofen-Süßkartoffel mit Kräuterquark", "g": [["Zutaten", [[1, "", "Süßkartoffel (ca. 250 g)"], [0.5, "TL", "Olivenöl"], [100, "g", "Magerquark"], [null, "", "Kräuter, Paprikapulver, Salz, Pfeffer"]]]], "s": [["Ofen vorheizen", "Backofen auf 200 °C Ober-/Unterhitze vorheizen."], ["Vorbereiten", "Süßkartoffel gründlich waschen und trocken tupfen. Längs halbieren, die Schnittflächen mit Olivenöl bepinseln und leicht salzen."], ["Backen", "Mit der Schnittfläche nach unten auf ein Blech mit Backpapier legen und 35–40 Minuten backen, bis sie sich mit einer Gabel leicht einstechen lässt."], ["Quark anrühren", "Währenddessen Magerquark mit 1–2 EL Wasser glatt rühren, gehackte Kräuter unterheben und mit Salz und Pfeffer würzen."], ["Servieren", "Süßkartoffelhälften umdrehen, das Fruchtfleisch mit einer Gabel etwas auflockern, Quark daraufgeben und mit Paprikapulver bestreuen."]]},
+{"id": "glasnudelsalat-mit-garnelen", "cat": "mittag", "ty": "fisch", "kcal": 290, "t": "15 Min.", "name": "Glasnudelsalat mit Garnelen", "g": [["Zutaten", [[40, "g", "Glasnudeln"], [80, "g", "Garnelen (gegart)"], [0.5, "", "Paprika"], [0.25, "", "Gurke"], [1, "", "kleine Karotte"], [1, "EL", "Sojasauce"], [1, "TL", "Sesamöl"], [null, "", "Limettensaft, Koriander"]]]], "s": [["Nudeln einweichen", "Glasnudeln in eine Schüssel geben, mit kochendem Wasser übergießen und 5 Minuten ziehen lassen. Abgießen, kalt abspülen und mit einer Schere etwas kürzer schneiden."], ["Gemüse schneiden", "Paprika, Gurke und Karotte in sehr feine Streifen schneiden oder hobeln."], ["Dressing", "Sojasauce, Sesamöl und Limettensaft verrühren. Nach Wunsch etwas Chili zugeben."], ["Mischen", "Glasnudeln, Gemüse und Garnelen mit dem Dressing vermengen und 5 Minuten durchziehen lassen."], ["Servieren", "Mit gehacktem Koriander bestreuen. Schmeckt kalt am besten."]]},
+{"id": "kuerbissuppe-mit-ingwer", "cat": "mittag", "ty": "veggie", "kcal": 330, "t": "30 Min.", "name": "Kürbissuppe mit Ingwer", "g": [["Zutaten", [[300, "g", "Hokkaido-Kürbis"], [1, "", "Karotte"], [0.5, "", "Zwiebel"], [1, "Stück", "Ingwer (2 cm)"], [300, "ml", "Gemüsebrühe"], [2, "EL", "Kokosmilch light"], [1, "TL", "Kürbiskerne"], [1, "Scheibe", "Vollkornbrot (dazu)"]]]], "s": [["Gemüse schneiden", "Kürbis waschen, halbieren und die Kerne mit einem Löffel herauskratzen. Hokkaido muss nicht geschält werden. In Würfel schneiden. Karotte und Zwiebel schälen und würfeln, Ingwer schälen und reiben."], ["Andünsten", "Zwiebel und Ingwer mit einem Schuss Brühe in einem Topf 2 Minuten andünsten."], ["Kochen", "Kürbis, Karotte und restliche Brühe zugeben, aufkochen und zugedeckt ca. 20 Minuten köcheln lassen, bis alles weich ist."], ["Pürieren", "Mit dem Stabmixer fein pürieren. Ist die Suppe zu dick, etwas Wasser zugeben. Mit Salz und Pfeffer abschmecken."], ["Servieren", "Kokosmilch einrühren oder als Spirale daraufgeben. Kürbiskerne in einer Pfanne ohne Fett kurz rösten und darüberstreuen. Brot dazu reichen."]]},
+{"id": "caesar-salad-light-mit-haehnchen", "cat": "mittag", "ty": "haehnchen", "kcal": 320, "t": "20 Min.", "name": "Caesar Salad light mit Hähnchen", "g": [["Zutaten", [[120, "g", "Hähnchenbrust"], [1, "", "kleiner Romanasalat"], [6, "", "Kirschtomaten"], [2, "EL", "Naturjoghurt (1,5 %)"], [1, "TL", "Senf"], [10, "g", "Parmesan (gerieben)"], [1, "Scheibe", "Vollkorntoast"], [null, "", "Zitronensaft, Salz, Pfeffer"]]]], "s": [["Hähnchen braten", "Hähnchenbrust trocken tupfen, salzen und pfeffern. In einer beschichteten Pfanne ohne Fett bei mittlerer Hitze 5–6 Minuten pro Seite braten, bis sie durchgegart ist. 3 Minuten ruhen lassen, dann in Streifen schneiden."], ["Croutons rösten", "Toast in kleine Würfel schneiden und in derselben Pfanne 3–4 Minuten unter Wenden knusprig rösten."], ["Dressing", "Joghurt, Senf, Zitronensaft, die Hälfte des Parmesans, Salz und Pfeffer glatt rühren. Bei Bedarf mit etwas Wasser verdünnen."], ["Salat vorbereiten", "Romanasalat waschen, trocken schleudern und in mundgerechte Stücke zupfen. Kirschtomaten halbieren."], ["Anrichten", "Salat und Tomaten mit dem Dressing mischen, Hähnchen und Croutons darauf verteilen und mit dem restlichen Parmesan bestreuen."]]},
+{"id": "huettenkaese-mit-ananas", "cat": "snack", "ty": "veggie", "kcal": 150, "t": "2 Min.", "name": "Hüttenkäse mit Ananas", "g": [["Zutaten", [[100, "g", "Hüttenkäse"], [80, "g", "Ananas"]]]], "s": [["Ananas vorbereiten", "Frische Ananas schälen, den harten Strunk entfernen und das Fruchtfleisch in kleine Würfel schneiden. Alternativ Ananas aus der Dose im eigenen Saft verwenden und gut abtropfen lassen."], ["Anrichten", "Hüttenkäse in eine Schale geben und die Ananaswürfel darauf verteilen."], ["Tipp", "Mit etwas Zimt oder frischer Minze bekommt der Snack einen besonderen Kick."]]},
+{"id": "paprikastreifen-mit-hummus", "cat": "snack", "ty": "veggie", "kcal": 140, "t": "3 Min.", "name": "Paprikastreifen mit Hummus", "g": [["Zutaten", [[1, "", "Paprika"], [40, "g", "Hummus"]]]], "s": [["Paprika schneiden", "Paprika waschen, halbieren, Kerne und weiße Häute entfernen und in breite Streifen schneiden."], ["Hummus anrichten", "Hummus in ein Schälchen geben. Nach Wunsch mit etwas Paprikapulver oder Kreuzkümmel bestreuen."], ["Servieren", "Paprikastreifen zum Dippen dazu servieren. Bunte Paprika sehen besonders schön aus."]]},
+{"id": "gefrorene-joghurt-beeren", "cat": "snack", "ty": "veggie", "kcal": 110, "t": "5 Min. + 2 Std.", "name": "Gefrorene Joghurt-Beeren", "g": [["Zutaten", [[100, "g", "Naturjoghurt (1,5 %)"], [100, "g", "Heidelbeeren oder Himbeeren"], [1, "TL", "Honig"]]]], "s": [["Vorbereiten", "Ein Brett oder einen flachen Teller mit Backpapier belegen, der ins Gefrierfach passt. Beeren waschen und sehr gut trocken tupfen."], ["Joghurt anrühren", "Joghurt mit dem Honig glatt verrühren."], ["Eintauchen", "Beeren einzeln mit einer Gabel oder einem Zahnstocher in den Joghurt tauchen, abtropfen lassen und mit Abstand auf das Backpapier setzen."], ["Gefrieren", "Mindestens 2 Stunden gefrieren lassen."], ["Aufbewahren", "Gefrorene Beeren in eine Gefrierdose umfüllen. Sie halten sich bis zu 4 Wochen. Direkt aus dem Gefrierfach genießen."]]},
+{"id": "mandarine-mit-walnuessen", "cat": "snack", "ty": "veggie", "kcal": 135, "t": "1 Min.", "name": "Mandarine mit Walnüssen", "g": [["Zutaten", [[1, "", "Mandarine"], [15, "g", "Walnüsse"]]]], "s": [["Walnüsse rösten", "Walnüsse nach Wunsch in einer Pfanne ohne Fett 2–3 Minuten anrösten, bis sie duften. Kurz abkühlen lassen."], ["Mandarine schälen", "Mandarine schälen und in Spalten teilen."], ["Genießen", "Zusammen genießen. Die Kombination aus Fruchtsäure und Nüssen sättigt gut und liefert gesunde Fette."]]},
+{"id": "gurkenroellchen-mit-lachs", "cat": "snack", "ty": "fisch", "kcal": 110, "t": "10 Min.", "name": "Gurkenröllchen mit Lachs", "g": [["Zutaten", [[0.5, "", "Gurke"], [30, "g", "Frischkäse light"], [30, "g", "Räucherlachs"], [null, "", "Dill"]]]], "s": [["Gurke schneiden", "Gurke waschen und mit einem Sparschäler der Länge nach in dünne, breite Streifen schneiden. Die ersten Streifen mit viel Schale weglassen. Streifen kurz auf Küchenpapier abtropfen lassen."], ["Bestreichen", "Jeden Gurkenstreifen dünn mit Frischkäse bestreichen."], ["Belegen", "Ein Stück Räucherlachs und etwas Dill darauflegen."], ["Aufrollen", "Streifen aufrollen und mit einem Zahnstocher fixieren. Mit Pfeffer bestreuen und gekühlt servieren."]]},
+{"id": "selbstgemachtes-popcorn", "cat": "snack", "ty": "veggie", "kcal": 120, "t": "5 Min.", "name": "Selbstgemachtes Popcorn", "g": [["Zutaten", [[20, "g", "Popcornmais"], [1, "TL", "Rapsöl"], [null, "", "Salz oder Zimt"]]]], "s": [["Topf vorbereiten", "Rapsöl in einen großen Topf mit Deckel geben und 3 Maiskörner dazulegen. Bei mittlerer bis hoher Hitze erwärmen."], ["Mais zugeben", "Sobald die Probe-Körner aufpoppen, den restlichen Mais zugeben, Deckel auflegen und den Topf kurz schwenken, damit alle Körner mit Öl benetzt sind."], ["Poppen lassen", "Bei mittlerer Hitze poppen lassen und den Topf dabei immer wieder leicht rütteln. Wenn zwischen dem Knallen 2–3 Sekunden Pause sind, vom Herd nehmen."], ["Würzen", "Popcorn in eine Schüssel geben und sofort mit etwas Salz oder Zimt bestreuen und durchschütteln. Ungepoppte Körner aussortieren."]]},
+{"id": "bananen-quark-shake", "cat": "snack", "ty": "veggie", "kcal": 190, "t": "3 Min.", "name": "Bananen-Quark-Shake", "g": [["Zutaten", [[0.5, "", "Banane"], [100, "g", "Magerquark"], [150, "ml", "Milch (1,5 %)"], [null, "", "Zimt"]]]], "s": [["Vorbereiten", "Banane schälen und in Stücke brechen. Für einen kalten Shake die Banane vorher einfrieren."], ["Mixen", "Banane, Magerquark und Milch in den Mixer geben und ca. 30 Sekunden cremig pürieren."], ["Anpassen", "Zu dick? Etwas Milch nachgießen. Zu wenig süß? Eine reifere Banane verwenden."], ["Servieren", "In ein Glas füllen und mit Zimt bestreuen. Sofort trinken."]]},
+{"id": "toskana-haehnchen-light-mit-vollkornnudeln", "cat": "abend", "ty": "haehnchen", "kcal": 470, "t": "25 Min.", "name": "Toskana-Hähnchen light mit Vollkornnudeln", "g": [["Zutaten", [[120, "g", "Hähnchenbrust (in Streifen)"], [40, "g", "Vollkornnudeln (roh)"], [50, "g", "Babyspinat"], [15, "g", "getrocknete Tomaten (nicht in Öl)"], [1, "", "Knoblauchzehe"], [50, "ml", "Milch (1,5 %)"], [30, "g", "Frischkäse light"], [1, "TL", "Olivenöl"], [10, "g", "Parmesan"], [null, "", "italienische Kräuter, Salz, Pfeffer"]]]], "s": [["Nudeln kochen", "Reichlich Salzwasser aufkochen und die Vollkornnudeln nach Packungsanweisung bissfest garen (meist ca. 10 Minuten). 3 EL Nudelwasser aufheben, dann abgießen."], ["Vorbereiten", "Hähnchen trocken tupfen und in Streifen schneiden. Knoblauch fein hacken, getrocknete Tomaten in Streifen schneiden."], ["Hähnchen braten", "Olivenöl in einer Pfanne erhitzen. Hähnchen 4–5 Minuten rundherum goldbraun braten, mit Salz und Pfeffer würzen und herausnehmen."], ["Sauce", "Knoblauch und Tomaten in der Pfanne 1 Minute andünsten. Milch und Frischkäse einrühren, bis eine glatte Sauce entsteht. Italienische Kräuter zugeben und 3 Minuten leise köcheln lassen."], ["Spinat und Käse", "Spinat unterheben und rühren, bis er zusammenfällt. Parmesan einrühren. Ist die Sauce zu dick, etwas Nudelwasser zugeben."], ["Servieren", "Hähnchen und Nudeln in die Sauce geben, alles gut durchschwenken und mit Pfeffer abschmecken."]]},
+{"id": "lachs-mit-ofengemuese-und-kraeuterquark", "cat": "abend", "ty": "fisch", "kcal": 410, "t": "30 Min.", "name": "Lachs mit Ofengemüse und Kräuterquark", "g": [["Zutaten", [[120, "g", "Lachsfilet"], [0.5, "", "Paprika"], [0.5, "", "Zucchini"], [80, "g", "Champignons"], [1, "TL", "Olivenöl"], [100, "g", "Magerquark"], [null, "", "Kräuter, Thymian, Salz, Pfeffer"]]]], "s": [["Ofen vorheizen", "Backofen auf 200 °C Ober-/Unterhitze vorheizen. Ein Blech mit Backpapier auslegen."], ["Gemüse vorbereiten", "Paprika und Zucchini in mundgerechte Stücke schneiden, Champignons putzen und halbieren. Mit Olivenöl, Thymian, Salz und Pfeffer mischen und auf dem Blech verteilen."], ["Gemüse backen", "Gemüse 15 Minuten backen."], ["Lachs dazulegen", "Lachs trocken tupfen, salzen, pfeffern und zwischen das Gemüse legen. Weitere 12–15 Minuten backen, bis der Lachs gerade gar und innen noch saftig ist."], ["Kräuterquark", "Währenddessen Magerquark mit 1–2 EL Wasser glatt rühren, gehackte Kräuter unterheben und mit Salz, Pfeffer und etwas Zitronensaft abschmecken."], ["Servieren", "Lachs und Ofengemüse auf einem Teller anrichten und den Kräuterquark dazu reichen."]]},
+{"id": "rindergeschnetzeltes-stroganoff-light-mit-reis", "cat": "abend", "ty": "rind", "kcal": 430, "t": "25 Min.", "name": "Rindergeschnetzeltes Stroganoff light mit Reis", "g": [["Zutaten", [[120, "g", "Rinderhüfte (in Streifen)"], [40, "g", "Reis (roh)"], [80, "g", "Champignons"], [0.25, "", "Zwiebel"], [1, "", "Gewürzgurke"], [50, "g", "saure Sahne (10 %)"], [50, "ml", "Rinderfond"], [1, "TL", "Senf"], [1, "TL", "Tomatenmark"], [1, "TL", "Öl"]]]], "s": [["Reis kochen", "Reis nach Packungsanweisung garen."], ["Vorbereiten", "Rinderhüfte quer zur Faser in dünne Streifen schneiden und trocken tupfen. Zwiebel fein würfeln, Champignons in Scheiben und die Gewürzgurke in feine Streifen schneiden."], ["Fleisch braten", "Öl in einer Pfanne sehr stark erhitzen. Fleisch darin 1 Minute scharf anbraten, sodass es innen noch rosa ist. Herausnehmen, salzen und pfeffern."], ["Pilze braten", "Zwiebel und Champignons in derselben Pfanne 4 Minuten kräftig braten. Tomatenmark und Senf zugeben und 1 Minute mitrösten."], ["Sauce", "Mit Rinderfond ablöschen, den Bratensatz vom Pfannenboden lösen und 3 Minuten köcheln lassen. Hitze reduzieren, saure Sahne und Gurkenstreifen einrühren. Ab jetzt nicht mehr kochen, sonst flockt die Sahne aus."], ["Fertigstellen", "Fleisch mit dem ausgetretenen Saft zurück in die Sauce geben, kurz erwärmen, mit Paprikapulver, Salz und Pfeffer abschmecken und mit dem Reis servieren."]]},
+{"id": "bohnen-fajita-mit-paprika", "cat": "abend", "ty": "veggie", "kcal": 370, "t": "20 Min.", "name": "Bohnen-Fajita mit Paprika", "g": [["Zutaten", [[80, "g", "Kidneybohnen (Dose, abgetropft)"], [1, "", "Paprika"], [0.5, "", "Zwiebel"], [1, "", "Vollkorn-Tortilla"], [2, "EL", "Naturjoghurt (1,5 %)"], [1, "TL", "Öl"], [null, "", "Paprikapulver, Kreuzkümmel, Knoblauchpulver, Limette"]]]], "s": [["Vorbereiten", "Paprika und Zwiebel in feine Streifen schneiden. Kidneybohnen abspülen und abtropfen lassen."], ["Gemüse braten", "Öl in einer Pfanne stark erhitzen und Paprika und Zwiebel 4–5 Minuten unter Rühren braten, bis sie leichte Röstaromen haben, aber noch knackig sind."], ["Bohnen zugeben", "Bohnen, Paprikapulver, Kreuzkümmel und Knoblauchpulver zugeben und 2 Minuten mitbraten. Einige Bohnen mit dem Pfannenwender leicht zerdrücken, so wird die Füllung cremiger."], ["Abschmecken", "Mit Salz und Limettensaft abschmecken."], ["Füllen", "Tortilla in einer Pfanne ohne Fett kurz erwärmen, mit Joghurt bestreichen, die Füllung darauf verteilen und einrollen."]]},
+{"id": "kabeljau-in-leichter-senfsauce-mit-kartoffeln", "cat": "abend", "ty": "fisch", "kcal": 350, "t": "25 Min.", "name": "Kabeljau in leichter Senfsauce mit Kartoffeln", "g": [["Zutaten", [[150, "g", "Kabeljaufilet"], [200, "g", "Kartoffeln"], [100, "ml", "Milch (1,5 %)"], [1, "TL", "Speisestärke"], [1, "EL", "mittelscharfer Senf"], [0.25, "", "Gurke"], [1, "EL", "Naturjoghurt"], [null, "", "Dill, Salz, Pfeffer"]]]], "s": [["Kartoffeln kochen", "Kartoffeln schälen, halbieren und in Salzwasser ca. 20 Minuten weich kochen."], ["Gurkensalat", "Währenddessen die Gurke in dünne Scheiben hobeln, leicht salzen und 5 Minuten ziehen lassen. Wasser abgießen, mit Joghurt, gehacktem Dill und Pfeffer anmachen."], ["Sauce ansetzen", "Milch in einer kleinen, breiten Pfanne erhitzen. Speisestärke mit 2 EL kaltem Wasser glatt rühren, in die heiße Milch rühren und 1 Minute köcheln lassen, bis die Sauce bindet."], ["Würzen", "Senf einrühren und mit Salz und Pfeffer abschmecken. Nach Wunsch etwas Dill hineingeben."], ["Fisch garen", "Kabeljau salzen und in die Sauce legen. Zugedeckt bei niedriger Hitze ca. 8 Minuten gar ziehen lassen. Die Sauce darf dabei nicht kochen, sonst wird der Fisch trocken."], ["Servieren", "Kartoffeln abgießen, ausdampfen lassen und mit dem Fisch in Senfsauce und dem Gurkensalat anrichten."]]},
+{"id": "haehnchen-gemuese-curry-light", "cat": "abend", "ty": "haehnchen", "kcal": 400, "t": "25 Min.", "name": "Hähnchen-Gemüse-Curry light", "g": [["Zutaten", [[120, "g", "Hähnchenbrust (gewürfelt)"], [40, "g", "Jasminreis (roh)"], [0.5, "", "Paprika"], [80, "g", "Brokkoli"], [1, "", "Karotte"], [100, "ml", "Kokosmilch light"], [1, "TL", "Currypaste"], [null, "", "Ingwer, Limettensaft"]]]], "s": [["Reis kochen", "Jasminreis nach Packungsanweisung garen."], ["Vorbereiten", "Hähnchen würfeln. Paprika in Streifen, Karotte in dünne Scheiben schneiden, Brokkoli in kleine Röschen teilen. Ingwer schälen und reiben."], ["Anrösten", "Currypaste und Ingwer in einer beschichteten Pfanne oder einem Wok bei mittlerer Hitze 1 Minute anrösten, bis es duftet."], ["Hähnchen braten", "Hähnchenwürfel zugeben und 3 Minuten rundherum anbraten."], ["Köcheln", "Karotte, Brokkoli und Paprika zugeben, Kokosmilch angießen und 8–10 Minuten bei mittlerer Hitze köcheln lassen, bis das Gemüse bissfest und das Hähnchen gar ist. Ist es zu dick, einen Schluck Wasser zugeben."], ["Abschmecken", "Mit Limettensaft und etwas Salz abschmecken und mit dem Reis servieren."]]},
+{"id": "gnocchi-gemuese-pfanne-light", "cat": "abend", "ty": "veggie", "kcal": 350, "t": "20 Min.", "name": "Gnocchi-Gemüse-Pfanne light", "g": [["Zutaten", [[150, "g", "Gnocchi (Kühlregal)"], [100, "g", "Kirschtomaten"], [50, "g", "Babyspinat"], [30, "g", "Mozzarella light"], [1, "TL", "Olivenöl"], [1, "", "Knoblauchzehe"], [null, "", "Basilikum, Salz, Pfeffer"]]]], "s": [["Vorbereiten", "Knoblauch fein hacken, Kirschtomaten halbieren, Spinat waschen und abtropfen lassen."], ["Gnocchi braten", "Olivenöl in einer beschichteten Pfanne erhitzen. Gnocchi direkt aus der Packung (ohne Vorkochen) hineingeben und 6–8 Minuten bei mittlerer Hitze braten, dabei öfter wenden, bis sie rundherum goldbraun und knusprig sind."], ["Tomaten", "Knoblauch und Tomaten zugeben und 3 Minuten mitbraten, bis die Tomaten leicht aufplatzen."], ["Spinat", "Spinat unterheben und rühren, bis er zusammengefallen ist. Mit Salz und Pfeffer würzen."], ["Überbacken", "Mozzarella in kleine Stücke zupfen, auf den Gnocchi verteilen, Deckel auflegen und 2 Minuten schmelzen lassen. Mit Basilikum bestreuen."]]},
+{"id": "schweinefilet-mit-brokkoli-und-petersilienkartoffeln", "cat": "abend", "ty": "schwein", "kcal": 330, "t": "30 Min.", "name": "Schweinefilet mit Brokkoli und Petersilienkartoffeln", "g": [["Zutaten", [[120, "g", "Schweinefilet"], [150, "g", "Brokkoli"], [150, "g", "Kartoffeln"], [1, "TL", "Öl"], [null, "", "Petersilie, Muskat, Salz, Pfeffer"]]]], "s": [["Kartoffeln kochen", "Kartoffeln schälen und in Salzwasser ca. 20 Minuten weich kochen."], ["Fleisch vorbereiten", "Schweinefilet 15 Minuten vor dem Braten aus dem Kühlschrank nehmen, Sehnen entfernen und in 2–3 cm dicke Medaillons schneiden. Trocken tupfen."], ["Medaillons braten", "Öl in einer Pfanne stark erhitzen und die Medaillons von jeder Seite 2–3 Minuten braten. Salzen, pfeffern und in Alufolie gewickelt 5 Minuten ruhen lassen. So bleiben sie saftig."], ["Brokkoli garen", "Brokkoli in Röschen teilen und in wenig Salzwasser ca. 5 Minuten bissfest garen. Abgießen und mit etwas Muskat würzen."], ["Servieren", "Kartoffeln abgießen, mit gehackter Petersilie bestreuen und mit Medaillons und Brokkoli anrichten. Den Fleischsaft aus der Folie darüberträufeln."]]},
+{"id": "gefuellte-paprika-mit-couscous-und-feta", "cat": "abend", "ty": "veggie", "kcal": 270, "t": "40 Min.", "name": "Gefüllte Paprika mit Couscous und Feta", "g": [["Zutaten", [[1, "", "große Paprika"], [30, "g", "Couscous"], [60, "ml", "heiße Gemüsebrühe"], [30, "g", "Feta"], [0.25, "", "Zucchini"], [150, "g", "passierte Tomaten"], [null, "", "Oregano, Salz, Pfeffer"]]]], "s": [["Ofen vorheizen", "Backofen auf 200 °C Ober-/Unterhitze vorheizen."], ["Couscous quellen", "Couscous in eine Schüssel geben, mit der heißen Gemüsebrühe übergießen, abdecken und 5 Minuten quellen lassen. Dann mit einer Gabel auflockern."], ["Füllung", "Zucchini fein würfeln. Mit dem Couscous, der Hälfte des zerbröselten Fetas, Oregano, Salz und Pfeffer mischen."], ["Paprika füllen", "Paprika längs halbieren, Kerne und weiße Häute entfernen. Die Hälften mit der Couscous-Mischung füllen und leicht andrücken."], ["Sauce", "Passierte Tomaten mit Salz, Pfeffer und etwas Oregano würzen und in eine kleine Auflaufform geben. Die gefüllten Paprika hineinsetzen."], ["Backen", "Restlichen Feta darüberstreuen und 25–30 Minuten backen, bis die Paprika weich und der Feta leicht gebräunt ist."]]},
+{"id": "asiatische-tofu-gemuesesuppe", "cat": "abend", "ty": "veggie", "kcal": 300, "t": "20 Min.", "name": "Asiatische Tofu-Gemüsesuppe", "g": [["Zutaten", [[120, "g", "Naturtofu"], [30, "g", "Reisnudeln"], [0.5, "", "Pak Choi"], [80, "g", "Champignons"], [1, "Stück", "Ingwer (2 cm)"], [350, "ml", "Gemüsebrühe"], [1, "EL", "Sojasauce"]]]], "s": [["Tofu vorbereiten", "Tofu aus der Packung nehmen, gut abtropfen lassen und mit Küchenpapier trocken drücken. In 2 cm große Würfel schneiden."], ["Gemüse schneiden", "Champignons in Scheiben schneiden. Pak Choi waschen, den Strunk abschneiden, die Stiele in Stücke und die Blätter in Streifen schneiden. Ingwer schälen und in feine Scheiben schneiden."], ["Brühe ansetzen", "Gemüsebrühe mit dem Ingwer aufkochen und 5 Minuten köcheln lassen, damit sie Aroma bekommt."], ["Einlage garen", "Reisnudeln, Champignons, Pak-Choi-Stiele und Tofu zugeben und 4 Minuten ziehen lassen. Dann die Pak-Choi-Blätter zugeben und 1 Minute mitgaren."], ["Abschmecken", "Mit Sojasauce abschmecken. Nach Wunsch mit Frühlingszwiebeln, Chili oder einem Spritzer Limette servieren."]]},
+{"id": "blumenkohl-kichererbsen-curry", "cat": "abend", "ty": "veggie", "kcal": 300, "t": "30 Min.", "name": "Blumenkohl-Kichererbsen-Curry", "g": [["Zutaten", [[200, "g", "Blumenkohl"], [80, "g", "Kichererbsen (Dose)"], [30, "g", "Basmatireis (roh)"], [50, "ml", "Kokosmilch light"], [100, "ml", "Gemüsebrühe"], [1, "TL", "Currypaste"], [30, "g", "Babyspinat"]]]], "s": [["Reis kochen", "Basmatireis nach Packungsanweisung garen."], ["Vorbereiten", "Blumenkohl in kleine Röschen teilen. Kichererbsen abspülen und abtropfen lassen."], ["Anrösten", "Currypaste in einem Topf bei mittlerer Hitze 1 Minute anrösten."], ["Köcheln", "Kokosmilch und Gemüsebrühe zugießen und aufkochen. Blumenkohl und Kichererbsen zugeben und zugedeckt 12 Minuten köcheln lassen, bis der Blumenkohl gar, aber noch bissfest ist."], ["Spinat", "Spinat unterheben und 1 Minute mitziehen lassen, bis er zusammenfällt. Mit Salz und nach Wunsch einem Spritzer Zitrone abschmecken."], ["Servieren", "Curry mit dem Reis anrichten."]]},
+{"id": "linsen-bolognese-mit-vollkornspaghetti", "cat": "abend", "ty": "veggie", "kcal": 430, "t": "25 Min.", "name": "Linsen-Bolognese mit Vollkornspaghetti", "g": [["Zutaten", [[50, "g", "Vollkornspaghetti"], [30, "g", "rote Linsen"], [150, "g", "passierte Tomaten"], [0.5, "", "Karotte"], [0.25, "", "Zwiebel"], [0.25, "", "Zucchini"], [1, "TL", "Olivenöl"], [10, "g", "Parmesan"], [null, "", "Oregano, Salz, Pfeffer"]]]], "s": [["Gemüse schneiden", "Zwiebel, Karotte und Zucchini sehr fein würfeln. Je feiner, desto mehr erinnert die Sauce an klassische Bolognese."], ["Andünsten", "Olivenöl in einem Topf erhitzen und das Gemüse bei mittlerer Hitze 4 Minuten andünsten."], ["Sauce köcheln", "Linsen abspülen und mit den passierten Tomaten, 100 ml Wasser und Oregano zugeben. Aufkochen und 12–15 Minuten köcheln lassen, bis die Linsen weich sind. Bei Bedarf etwas Wasser nachgießen."], ["Nudeln kochen", "Währenddessen die Spaghetti in reichlich Salzwasser nach Packungsanweisung bissfest garen und abgießen."], ["Servieren", "Sauce mit Salz und Pfeffer abschmecken, über die Spaghetti geben und mit Parmesan bestreuen."]]},
+{"id": "spinat-feta-frittata-mit-salat", "cat": "abend", "ty": "veggie", "kcal": 290, "t": "20 Min.", "name": "Spinat-Feta-Frittata mit Salat", "g": [["Zutaten", [[2, "", "Eier"], [60, "g", "Babyspinat"], [0.5, "", "Paprika"], [20, "g", "Feta"], [1, "TL", "Olivenöl"], [1, "Handvoll", "Blattsalat"], [null, "", "Zitronensaft, Salz, Pfeffer"]]]], "s": [["Vorbereiten", "Paprika würfeln, Spinat waschen und abtropfen lassen. Eier mit Salz und Pfeffer verquirlen."], ["Gemüse braten", "Olivenöl in einer kleinen beschichteten Pfanne erhitzen. Paprika 3 Minuten braten, dann Spinat zugeben und rühren, bis er zusammenfällt."], ["Stocken lassen", "Gemüse gleichmäßig verteilen, die Eier darübergießen und den Feta darüberbröseln. Deckel auflegen und bei niedriger Hitze 8–10 Minuten stocken lassen, bis die Oberfläche fest ist."], ["Salat", "Währenddessen den Blattsalat waschen, trocken schleudern und mit Zitronensaft, Salz und Pfeffer anmachen."], ["Servieren", "Frittata aus der Pfanne gleiten lassen, in Stücke schneiden und mit dem Salat servieren. Schmeckt auch kalt am nächsten Tag."]]},
+{"id": "rindersteak-mit-buntem-salat", "cat": "abend", "ty": "rind", "kcal": 260, "t": "20 Min.", "name": "Rindersteak mit buntem Salat", "g": [["Zutaten", [[150, "g", "Rinderhüftsteak"], [1, "Handvoll", "Blattsalat"], [0.25, "", "Gurke"], [6, "", "Kirschtomaten"], [0.5, "", "Paprika"], [1, "TL", "Olivenöl"], [1, "TL", "heller Balsamico"], [0.5, "TL", "Senf"], [0.5, "TL", "Honig"]]]], "s": [["Steak temperieren", "Steak 30 Minuten vor dem Braten aus dem Kühlschrank nehmen und mit Küchenpapier trocken tupfen."], ["Salat vorbereiten", "Blattsalat waschen und trocken schleudern. Gurke in Scheiben, Paprika in Streifen schneiden, Kirschtomaten halbieren."], ["Dressing", "Olivenöl, Balsamico, Senf und Honig mit Salz und Pfeffer glatt rühren."], ["Steak braten", "Eine beschichtete oder gusseiserne Pfanne sehr stark erhitzen. Steak ohne Fett 2–3 Minuten pro Seite braten (medium). Nicht zwischendurch bewegen, damit eine schöne Kruste entsteht."], ["Ruhen lassen", "Steak auf einem Brett locker mit Alufolie abdecken und 5 Minuten ruhen lassen. Erst dann mit grobem Salz und Pfeffer würzen und schräg in Streifen schneiden."], ["Servieren", "Salat mit dem Dressing mischen und mit den Steakstreifen anrichten."]]},
+{"id": "beeren-quark-creme", "cat": "dessert", "ty": "veggie", "kcal": 155, "t": "10 Min.", "name": "Beeren-Quark-Creme", "g": [["Zutaten", [[125, "g", "Magerquark"], [40, "g", "Naturjoghurt (1,5 %)"], [1, "TL", "Honig"], [75, "g", "Beeren"], [null, "", "etwas Vanille"]]]], "s": [["Creme rühren", "Magerquark, Joghurt, Honig und Vanille in einer Schüssel cremig rühren."], ["Beeren vorbereiten", "Beeren waschen und abtropfen lassen (TK-Beeren vorher auftauen). Etwa die Hälfte mit einer Gabel leicht zerdrücken, so entsteht eine fruchtige Sauce."], ["Schichten", "Abwechselnd Creme und zerdrückte Beeren in ein Glas schichten."], ["Garnieren", "Mit den ganzen Beeren abschließen. Nach Wunsch 15 Minuten kühlen, dann schmeckt es besonders frisch."]]},
+{"id": "bratapfel-mit-walnuessen-und-zimt", "cat": "dessert", "ty": "veggie", "kcal": 180, "t": "30 Min.", "name": "Bratapfel mit Walnüssen und Zimt", "g": [["Zutaten", [[1, "", "säuerlicher Apfel"], [10, "g", "Walnüsse (gehackt)"], [5, "g", "Rosinen"], [0.5, "TL", "Honig"], [null, "", "Zimt"]]]], "s": [["Ofen vorheizen", "Backofen auf 180 °C Ober-/Unterhitze vorheizen."], ["Apfel vorbereiten", "Apfel waschen und das Kerngehäuse mit einem Apfelausstecher oder einem kleinen Messer großzügig herausschneiden. Den Boden dabei nicht durchstechen. Einen schmalen Deckel abschneiden."], ["Füllung", "Walnüsse, Rosinen, Honig und Zimt mischen und fest in den Apfel drücken. Deckel wieder aufsetzen."], ["Backen", "Apfel in eine kleine ofenfeste Form setzen, 2 EL Wasser angießen und ca. 25 Minuten backen, bis er weich ist und die Schale leicht aufplatzt."], ["Servieren", "Warm servieren. Ein Klecks Naturjoghurt passt gut dazu."]]},
+{"id": "schoko-bananen-eis", "cat": "dessert", "ty": "veggie", "kcal": 150, "t": "5 Min. + Gefrieren", "name": "Schoko-Bananen-Eis", "g": [["Zutaten", [[1, "", "reife Banane"], [1, "TL", "Backkakao"], [2, "EL", "Milch"], [5, "g", "Zartbitterschokolade (geraspelt)"]]]], "s": [["Einfrieren", "Banane schälen, in Scheiben schneiden und auf einem Teller mit Backpapier mindestens 4 Stunden einfrieren. Am besten immer ein paar gefrorene Bananen vorrätig haben."], ["Antauen lassen", "Gefrorene Bananenscheiben 5 Minuten bei Raumtemperatur antauen lassen, dann lassen sie sich leichter pürieren."], ["Pürieren", "Banane mit Kakao und Milch im Mixer oder mit einem kräftigen Stabmixer pürieren. Zwischendurch die Masse vom Rand schieben, bis eine cremige Eiskonsistenz entsteht."], ["Servieren", "Sofort in eine Schale füllen und mit Schokoraspeln bestreuen. Für festere Konsistenz noch 20 Minuten ins Gefrierfach stellen."]]},
+{"id": "tiramisu-light-im-glas", "cat": "dessert", "ty": "veggie", "kcal": 230, "t": "15 Min. + 2 Std.", "name": "Tiramisu light im Glas", "g": [["Zutaten", [[80, "g", "Magerquark"], [20, "g", "Mascarpone"], [1, "TL", "Honig"], [3, "", "Löffelbiskuits"], [40, "ml", "kalter Espresso"], [0.5, "TL", "Backkakao"]]]], "s": [["Creme rühren", "Magerquark, Mascarpone und Honig in einer Schüssel glatt und cremig rühren."], ["Biskuits tränken", "Espresso in einen tiefen Teller geben. Löffelbiskuits halbieren und jeweils nur kurz (1–2 Sekunden) in den Espresso tauchen, damit sie nicht zerfallen."], ["Schichten", "Eine Lage Biskuits in ein Glas legen, Creme daraufgeben und wiederholen. Mit einer Schicht Creme abschließen."], ["Kühlen", "Mindestens 2 Stunden im Kühlschrank durchziehen lassen."], ["Bestäuben", "Kurz vor dem Servieren den Kakao durch ein kleines Sieb darüberstäuben."]]},
+{"id": "milchreis-mit-kirschen", "cat": "dessert", "ty": "veggie", "kcal": 260, "t": "35 Min.", "name": "Milchreis mit Kirschen", "g": [["Zutaten", [[30, "g", "Milchreis"], [180, "ml", "Milch (1,5 %)"], [1, "TL", "Zucker"], [80, "g", "Sauerkirschen (Glas, abgetropft)"], [null, "", "Zimt"]]]], "s": [["Aufkochen", "Milch mit Zucker und einer Prise Salz in einem kleinen Topf aufkochen. Topf mit kaltem Wasser ausspülen, dann brennt die Milch weniger an."], ["Reis quellen", "Milchreis einrühren, Hitze auf die kleinste Stufe reduzieren und den Reis zugedeckt 25–30 Minuten quellen lassen. Alle paar Minuten umrühren, damit nichts am Boden ansetzt."], ["Konsistenz prüfen", "Der Reis ist fertig, wenn die Körner weich sind und die Masse cremig ist. Ist er zu fest, einen Schluck Milch unterrühren."], ["Kirschen", "Kirschen abtropfen lassen und nach Wunsch in einem kleinen Topf mit 2 EL Kirschsaft kurz erwärmen."], ["Servieren", "Milchreis in eine Schale füllen, Kirschen darauf verteilen und mit Zimt bestreuen. Schmeckt warm und kalt."]]},
+{"id": "apfel-crumble", "cat": "dessert", "ty": "veggie", "kcal": 230, "t": "30 Min.", "name": "Apfel-Crumble", "g": [["Zutaten", [[1, "", "Apfel"], [15, "g", "Haferflocken"], [5, "g", "Butter"], [1, "TL", "Ahornsirup"], [5, "g", "gehackte Mandeln"], [null, "", "Zimt"]]]], "s": [["Ofen vorheizen", "Backofen auf 180 °C Ober-/Unterhitze vorheizen."], ["Äpfel vorbereiten", "Apfel waschen, entkernen und in kleine Würfel schneiden. Mit Zimt mischen und in eine kleine Auflaufform oder ofenfeste Schale geben."], ["Streusel", "Haferflocken, kalte Butter in kleinen Stückchen, Ahornsirup und Mandeln in einer Schüssel mit den Fingern zu Streuseln verreiben."], ["Backen", "Streusel gleichmäßig über die Äpfel verteilen und 20–25 Minuten backen, bis die Streusel goldbraun sind und die Äpfel an den Rändern blubbern."], ["Servieren", "5 Minuten abkühlen lassen und warm servieren. Ein Löffel Joghurt passt gut dazu."]]},
+{"id": "mango-joghurt-creme-mit-limette", "cat": "dessert", "ty": "veggie", "kcal": 125, "t": "5 Min.", "name": "Mango-Joghurt-Creme mit Limette", "g": [["Zutaten", [[150, "g", "Naturjoghurt (1,5 %)"], [80, "g", "Mango"], [null, "", "Limettenabrieb, Minze"]]]], "s": [["Mango vorbereiten", "Mango schälen, das Fruchtfleisch vom Kern schneiden und würfeln."], ["Pürieren", "Die Hälfte der Mangowürfel mit einer Gabel oder dem Stabmixer fein pürieren."], ["Creme", "Joghurt glatt rühren und das Mangopüree locker unterziehen, sodass ein Marmoreffekt entsteht."], ["Anrichten", "Creme in ein Glas füllen, restliche Mangowürfel darauf verteilen und mit Limettenabrieb und frischer Minze garnieren."]]},
+{"id": "zimt-birne-aus-dem-ofen", "cat": "dessert", "ty": "veggie", "kcal": 165, "t": "25 Min.", "name": "Zimt-Birne aus dem Ofen", "g": [["Zutaten", [[1, "", "Birne"], [0.5, "TL", "Honig"], [50, "g", "Naturjoghurt (1,5 %)"], [5, "g", "Mandelblättchen"], [null, "", "Zimt"]]]], "s": [["Ofen vorheizen", "Backofen auf 180 °C Ober-/Unterhitze vorheizen."], ["Birne vorbereiten", "Birne waschen, längs halbieren und das Kerngehäuse mit einem Teelöffel herauslösen."], ["Backen", "Birnenhälften mit der Schnittfläche nach oben in eine kleine Form legen, mit Honig beträufeln und mit Zimt bestreuen. Ca. 20 Minuten backen, bis sie weich sind."], ["Mandeln rösten", "Mandelblättchen in einer Pfanne ohne Fett 1–2 Minuten goldbraun rösten."], ["Servieren", "Birnen warm mit dem Joghurt anrichten und mit den Mandelblättchen bestreuen."]]},
+{"id": "schoko-skyr-mousse", "cat": "dessert", "ty": "veggie", "kcal": 150, "t": "5 Min.", "name": "Schoko-Skyr-Mousse", "g": [["Zutaten", [[150, "g", "Skyr"], [1, "TL", "Backkakao"], [1, "TL", "Honig"], [5, "g", "Zartbitterschokolade (geraspelt)"]]]], "s": [["Kakao auflösen", "Kakao mit dem Honig und 1 EL heißem Wasser glatt rühren. So entstehen keine Klümpchen."], ["Mousse rühren", "Skyr zugeben und mit einem Schneebesen kräftig aufschlagen, bis die Masse luftig und gleichmäßig braun ist."], ["Kühlen", "In ein Glas füllen und nach Wunsch 15 Minuten kalt stellen."], ["Garnieren", "Mit Schokoraspeln bestreuen. Ein paar Himbeeren passen hervorragend dazu."]]},
+{"id": "erdbeeren-mit-balsamico-und-minze", "cat": "dessert", "ty": "veggie", "kcal": 100, "t": "5 Min.", "name": "Erdbeeren mit Balsamico und Minze", "g": [["Zutaten", [[200, "g", "Erdbeeren"], [1, "TL", "Balsamico-Creme"], [2, "EL", "Naturjoghurt (1,5 %)"], [null, "", "frische Minze"]]]], "s": [["Erdbeeren vorbereiten", "Erdbeeren waschen, erst dann den Strunk entfernen (sonst saugen sie sich mit Wasser voll) und vierteln."], ["Marinieren", "Erdbeeren mit der Balsamico-Creme vorsichtig mischen und 10 Minuten ziehen lassen. Der Balsamico verstärkt das Erdbeeraroma."], ["Minze", "Minzblätter fein schneiden."], ["Servieren", "Erdbeeren in eine Schale geben, Joghurt daraufsetzen und mit Minze und etwas frisch gemahlenem Pfeffer bestreuen."]]},
+{"id": "schnelles-beeren-sorbet", "cat": "dessert", "ty": "veggie", "kcal": 105, "t": "5 Min.", "name": "Schnelles Beeren-Sorbet", "g": [["Zutaten", [[150, "g", "TK-Beeren"], [50, "g", "Naturjoghurt (1,5 %)"], [1, "TL", "Honig"]]]], "s": [["Antauen lassen", "TK-Beeren 3–5 Minuten bei Raumtemperatur antauen lassen."], ["Pürieren", "Beeren mit Joghurt und Honig in einen leistungsstarken Mixer oder ein hohes Gefäß geben und pürieren, bis eine cremige, gleichmäßige Masse entsteht. Zwischendurch mit einem Löffel nachschieben."], ["Abschmecken", "Zu sauer? Etwas mehr Honig zugeben. Zu fest? 1 EL Joghurt ergänzen."], ["Servieren", "Sofort servieren, solange es eisig ist. Für Kugeln 20 Minuten ins Gefrierfach stellen."]]},
+{"id": "kirsch-quark-auflauf", "cat": "dessert", "ty": "veggie", "kcal": 240, "t": "30 Min.", "name": "Kirsch-Quark-Auflauf", "g": [["Zutaten", [[100, "g", "Magerquark"], [1, "", "Ei"], [10, "g", "Grieß"], [1, "TL", "Honig"], [60, "g", "Kirschen (Glas oder TK)"]]]], "s": [["Ofen vorheizen", "Backofen auf 180 °C Ober-/Unterhitze vorheizen und eine kleine Auflaufform leicht einfetten."], ["Masse rühren", "Magerquark, Ei, Grieß und Honig glatt verrühren. Nach Wunsch etwas Zitronenabrieb oder Vanille zugeben. 5 Minuten quellen lassen."], ["Kirschen", "Kirschen gut abtropfen lassen (TK-Kirschen vorher auftauen) und in der Form verteilen."], ["Backen", "Quarkmasse über die Kirschen streichen und ca. 25 Minuten backen, bis die Oberfläche goldgelb und fest ist."], ["Servieren", "Kurz abkühlen lassen. Schmeckt warm und kalt."]]},
+{"id": "gebratene-ananas-mit-zimt", "cat": "dessert", "ty": "veggie", "kcal": 125, "t": "10 Min.", "name": "Gebratene Ananas mit Zimt", "g": [["Zutaten", [[150, "g", "Ananas"], [50, "g", "Naturjoghurt (1,5 %)"], [0.5, "TL", "Kokosraspel"], [null, "", "Zimt"]]]], "s": [["Ananas schneiden", "Ananas schälen, den Strunk entfernen und in ca. 1 cm dicke Scheiben schneiden."], ["Braten", "Eine beschichtete Pfanne ohne Fett stark erhitzen. Ananasscheiben von jeder Seite 2–3 Minuten braten, bis sie goldbraun karamellisiert sind."], ["Würzen", "Noch in der Pfanne mit Zimt bestreuen."], ["Kokos rösten", "Kokosraspel kurz in der heißen Pfanne anrösten."], ["Servieren", "Ananas warm mit dem Joghurt anrichten und mit den Kokosraspeln bestreuen."]]},
+{"id": "bananen-hafer-kekse", "cat": "dessert", "ty": "veggie", "kcal": 150, "t": "20 Min.", "name": "Bananen-Hafer-Kekse", "g": [["Zutaten", [[0.5, "", "reife Banane"], [20, "g", "zarte Haferflocken"], [5, "g", "Zartbitterschokolade (gehackt)"], [null, "", "Zimt"]]]], "s": [["Ofen vorheizen", "Backofen auf 180 °C Ober-/Unterhitze vorheizen und ein Blech mit Backpapier auslegen."], ["Teig", "Banane mit einer Gabel fein zerdrücken. Je reifer die Banane, desto süßer die Kekse. Haferflocken, gehackte Schokolade und Zimt unterrühren."], ["Quellen lassen", "Teig 5 Minuten ruhen lassen, damit die Haferflocken die Feuchtigkeit aufnehmen."], ["Formen", "Mit einem Teelöffel 4 kleine Häufchen auf das Blech setzen und flach drücken. Die Kekse laufen nicht auseinander."], ["Backen", "12–15 Minuten backen, bis die Ränder goldbraun sind. Auf dem Blech abkühlen lassen, dabei werden sie fester."]]}
+];
+const CATS = [["fruehstueck","Frühstück"],["mittag","Mittagessen"],["snack","Snacks"],["abend","Abendessen"],["dessert","Desserts"]];
+const TYPES = {veggie:["Vegetarisch","#5E8C3A"],haehnchen:["Hähnchen","#D49A16"],pute:["Pute","#B07A2E"],rind:["Rind","#A8483A"],schwein:["Schwein","#D9788A"],fisch:["Fisch","#4A6FA5"]};
+const DAYS = ["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+const TODAY = (new Date().getDay()+6)%7;
+const ICONS = {
+  rezepte:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5A2.5 2.5 0 0 0 4 21.5 2.5 2.5 0 0 0 6.5 24"/><path d="M8 7h8M8 11h6"/></svg>',
+  wochenplan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  einkauf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>',
+  favoriten:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>'
+};
+
+/* ---------- Speicher ---------- */
+const S = {view:"rezepte", cat:"fruehstueck", q:"", ty:"", favs:new Set(), own:[], plan:{}, people:1, checked:new Set(), extras:[], timers:[]};
+function load(){
+  const g = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } };
+  S.favs = new Set(g("kt-favs", [])); S.own = g("kt-own", []); S.plan = g("kt-plan", {});
+  S.people = Math.max(1, g("kt-people", 1)); S.checked = new Set(g("kt-checked", [])); S.extras = g("kt-extras", []);
+}
+function save(){
+  try {
+    localStorage.setItem("kt-favs", JSON.stringify([...S.favs])); localStorage.setItem("kt-own", JSON.stringify(S.own));
+    localStorage.setItem("kt-plan", JSON.stringify(S.plan)); localStorage.setItem("kt-people", JSON.stringify(S.people));
+    localStorage.setItem("kt-checked", JSON.stringify([...S.checked])); localStorage.setItem("kt-extras", JSON.stringify(S.extras));
+  } catch(e){}
+}
+
+/* ---------- Hilfen ---------- */
+const all = () => BASE.concat(S.own);
+const byId = id => all().find(r => r.id === id);
+const catName = id => (CATS.find(c => c[0] === id) || [,""])[1];
+const typ = r => TYPES[r.ty] || TYPES.veggie;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const isOwn = r => r.id.startsWith("eigen-");
+function fmt(v){
+  const w = Math.floor(v + 1e-9), r = Math.round((v - w) * 100) / 100, fr = {0.25:"¼",0.5:"½",0.75:"¾"};
+  if (r === 0) return String(w);
+  if (fr[r]) return (w ? w + " " : "") + fr[r];
+  return (Math.round(v * 10) / 10).toLocaleString("de-DE");
+}
+function amt(a, u, f){
+  if (a === null || a === undefined) return "";
+  const s = Array.isArray(a) ? a.map(x => fmt(x * f)).join("–") : fmt(a * f);
+  return s + (u ? " " + u : "");
+}
+function parseNum(t){
+  t = t.trim(); const fr = {"½":0.5,"¼":0.25,"¾":0.75}; let extra = 0;
+  const last = t.slice(-1);
+  if (fr[last] !== undefined){ extra = fr[last]; t = t.slice(0,-1).trim(); if (!t) return extra; }
+  const v = Number(t.replace(",", "."));
+  return isNaN(v) ? null : v + extra;
+}
+function parseAmount(t){
+  t = t.trim(); if (!t) return null;
+  const parts = t.split(/[-–]/).map(parseNum);
+  if (parts.some(p => p === null) || parts.length > 2) return undefined;
+  return parts.length === 1 ? parts[0] : parts;
+}
+function timerMinutes(text){
+  const m = /(\d+)(?:\s*[–-]\s*\d+)?\s*(Minuten|Minute|Min\.?|Stunden|Stunde|Std\.?)/.exec(text);
+  if (!m) return null; const n = +m[1]; if (!n) return null;
+  return m[2].startsWith("St") ? n * 60 : n;
+}
+const dur = m => (m >= 60 && m % 60 === 0) ? (m/60) + " Std." : m + " Min.";
+function metaText(r){
+  const p = [typ(r)[0]]; if (r.t) p.push(r.t); if (isOwn(r)) p.push("Eigenes Rezept"); return p.join(" · ");
+}
+function matches(r, q){
+  q = q.trim().toLowerCase(); if (!q) return true;
+  return r.name.toLowerCase().includes(q) || r.g.some(g => g[1].some(i => String(i[2]).toLowerCase().includes(q)));
+}
+
+/* ---------- Bausteine ---------- */
+function rowHTML(r, action){
+  const [tn, tc] = typ(r);
+  const kc = r.kcal > 0 ? `${r.kcal}<small>kcal</small>` : "✎";
+  return `<li><button class="rrow" data-act="${action || "open"}" data-id="${esc(r.id)}">
+    <span class="kc" style="background:${tc}22">${kc}</span>
+    <span style="min-width:0"><h3>${esc(r.name)}</h3><span class="meta"><span class="dot" style="background:${tc}"></span>${esc(metaText(r))}</span></span>
+    ${S.favs.has(r.id) ? '<span class="heart" aria-label="Favorit">♥</span>' : ""}
+  </button></li>`;
+}
+
+/* ---------- Ansichten ---------- */
+function render(){
+  document.getElementById("tabs").innerHTML = [["rezepte","Rezepte"],["wochenplan","Wochenplan"],["einkauf","Einkauf"],["favoriten","Favoriten"]]
+    .map(([id,l]) => `<button class="tab" data-act="tab" data-id="${id}" ${S.view===id?'aria-current="page"':""}>${ICONS[id]}${l}</button>`).join("");
+  const app = document.getElementById("app");
+  if (S.view === "rezepte") app.innerHTML = viewRezepte();
+  if (S.view === "wochenplan") app.innerHTML = viewPlan();
+  if (S.view === "einkauf") app.innerHTML = viewShop();
+  if (S.view === "favoriten") app.innerHTML = viewFavs();
+  if (S.view === "rezepte") renderList();
+}
+function viewRezepte(){
+  return `<div class="top"><h1>Kochbuch to Go</h1>
+    <div class="chips">${CATS.map(([id,l]) => `<button class="chip" data-act="cat" data-id="${id}" aria-pressed="${S.cat===id}">${l}</button>`).join("")}</div>
+    <div class="row2"><input class="input" id="q" type="search" placeholder="Rezept oder Zutat suchen" aria-label="Suchen" value="${esc(S.q)}">
+    <select class="select input" id="ty" aria-label="Filter"><option value="">Alle</option>${Object.entries(TYPES).map(([k,[n]]) => `<option value="${k}" ${S.ty===k?"selected":""}>${n}</option>`).join("")}</select></div></div>
+    <div class="sub" id="count"></div><ul class="list" id="list"></ul>
+    <button class="btn soft block" data-act="new" style="margin-top:16px">+ Eigenes Rezept eintragen</button>`;
+}
+function renderList(){
+  const items = all().filter(r => r.cat === S.cat && (!S.ty || r.ty === S.ty) && matches(r, S.q));
+  document.getElementById("count").textContent = `${items.length} Rezepte · je 1 Portion`;
+  document.getElementById("list").innerHTML = items.length ? items.map(r => rowHTML(r)).join("") : `<li class="empty">Keine Rezepte gefunden.</li>`;
+}
+function viewFavs(){
+  const favs = all().filter(r => S.favs.has(r.id));
+  if (!favs.length) return `<div class="top"><h1>Favoriten</h1></div><p class="empty">Noch keine Favoriten.<br>Tippe in einem Rezept auf „♡ Merken“.</p>`;
+  return `<div class="top"><h1>Favoriten</h1></div>` + CATS.map(([id,l]) => {
+    const it = favs.filter(r => r.cat === id); if (!it.length) return "";
+    return `<div class="sec-h">${l}</div><ul class="list">${it.map(r => rowHTML(r)).join("")}</ul>`;
+  }).join("");
+}
+function viewPlan(){
+  return `<div class="top"><h1>Wochenplan</h1>
+    <div class="toolbar"><button class="btn soft" data-act="fill">Leere Plätze zufällig füllen</button><button class="btn danger" data-act="clearplan">Plan leeren</button></div></div>` +
+    DAYS.map((d, i) => {
+      const meals = CATS.map(([c,l]) => { const r = byId(S.plan[i+"|"+c]); return r ? {c,l,r} : null; }).filter(Boolean);
+      const missing = CATS.filter(([c]) => !byId(S.plan[i+"|"+c]));
+      const k = meals.reduce((a,m) => a + (m.r.kcal||0), 0);
+      return `<div class="day"><div class="day-h"><div>${d}${i===TODAY?'<span class="today">● Heute</span>':""}</div><span>${k ? "ca. " + k + " kcal" : ""}</span></div>
+        ${meals.map(m => `<div class="meal"><button class="open" data-act="open" data-id="${esc(m.r.id)}"><small>${m.l}</small>${esc(m.r.name)}</button>
+          <span class="meta">${m.r.kcal||""}</span>
+          <button class="ib" data-act="swap" data-day="${i}" data-cat="${m.c}" aria-label="Tauschen">↻</button>
+          <button class="ib" data-act="unplan" data-day="${i}" data-cat="${m.c}" aria-label="Entfernen">×</button></div>`).join("")}
+        ${missing.length ? `<select class="select input addmeal" data-act="addmeal" data-day="${i}" aria-label="Mahlzeit hinzufügen"><option value="">+ Mahlzeit hinzufügen</option>${missing.map(([c,l]) => `<option value="${c}">${l}</option>`).join("")}</select>` : ""}
+      </div>`;
+    }).join("");
+}
+function shopItems(){
+  const acc = new Map();
+  Object.values(S.plan).forEach(id => {
+    const r = byId(id); if (!r) return;
+    r.g.forEach(g => g[1].forEach(([a,u,n]) => {
+      const key = String(n).toLowerCase() + "|" + String(u).toLowerCase();
+      const e = acc.get(key) || {name:n, unit:u, total:0, has:false, rec:new Set()};
+      if (a !== null && a !== undefined){ e.total += Array.isArray(a) ? Math.max(...a) : a; e.has = true; }
+      e.rec.add(r.id); acc.set(key, e);
+    }));
+  });
+  return [...acc.entries()].map(([key,e]) => ({key, name:e.name, amount: e.has ? fmt(e.total * S.people) + (e.unit ? " " + e.unit : "") : "", n:e.rec.size}))
+    .sort((a,b) => a.name.localeCompare(b.name, "de"));
+}
+function shopRow(key, name, amount, n, done){
+  return `<button class="shop ${done?"done":""}" data-act="check" data-key="${esc(key)}"><span class="chk">${done?"✓":""}</span>
+    <span class="nm">${esc(name)}${n>1?`<small>für ${n} Rezepte</small>`:""}</span><span class="am">${esc(amount)}</span></button>`;
+}
+function viewShop(){
+  const items = shopItems(), open = items.filter(i => !S.checked.has(i.key)), done = items.filter(i => S.checked.has(i.key));
+  const exOpen = S.extras.filter(x => !S.checked.has("extra|"+x)), exDone = S.extras.filter(x => S.checked.has("extra|"+x));
+  return `<div class="top"><h1>Einkaufsliste</h1>
+    <div class="toolbar"><button class="btn" data-act="shareshop">Liste teilen</button><button class="btn soft" data-act="resetchecks">Häkchen entfernen</button></div></div>
+    <div class="card"><div class="serv" style="padding:8px 0;justify-content:space-between"><span>Für <b>${S.people}</b> ${S.people===1?"Person":"Personen"}</span>
+      <span style="display:flex;gap:8px"><button data-act="people" data-d="-1" aria-label="Weniger Personen">−</button><button data-act="people" data-d="1" aria-label="Mehr Personen">+</button></span></div></div>
+    <div class="sub">Berechnet aus ${Object.keys(S.plan).length} geplanten Mahlzeiten im Wochenplan.</div>
+    ${!items.length && !S.extras.length ? `<p class="empty">Noch nichts geplant.<br>Plane im Wochenplan Mahlzeiten, dann erscheinen die Zutaten hier.</p>` : ""}
+    ${open.length ? `<div class="sec-h">Zu kaufen (${open.length})</div>` + open.map(i => shopRow(i.key,i.name,i.amount,i.n,false)).join("") : ""}
+    <div class="sec-h">Eigene Artikel</div>
+    ${exOpen.map(x => shopRow("extra|"+x, x, "", 0, false)).join("")}
+    <div class="row2"><input class="input" id="extra" placeholder="Artikel hinzufügen, z. B. Kaffee" aria-label="Artikel hinzufügen"><button class="btn" data-act="addextra">+</button></div>
+    ${done.length || exDone.length ? `<div class="sec-h">Erledigt</div>` + done.map(i => shopRow(i.key,i.name,i.amount,i.n,true)).join("") + exDone.map(x => shopRow("extra|"+x, x, "", 0, true)).join("") +
+      (exDone.length ? `<button class="link" data-act="clearextras">Erledigte eigene Artikel löschen</button>` : "") : ""}`;
+}
+
+/* ---------- Rezept-Detail ---------- */
+let cur = null, portions = 1;
+function openRecipe(id){ cur = id; portions = 1; renderDetail(); openSheet(); }
+function renderDetail(){
+  const r = byId(cur); if (!r){ closeSheet(); return; }
+  const [tn, tc] = typ(r), fav = S.favs.has(r.id);
+  const items = r.g.flatMap(g => g[1]);
+  document.getElementById("sheetBody").innerHTML = `
+    <div class="sheet-bar"><button class="x" data-act="close">‹ Zurück</button><button class="x" data-act="share">Teilen</button></div>
+    <div class="dt-cat">${catName(r.cat)}</div><h2 class="dt-h">${esc(r.name)}</h2>${isOwn(r) ? '<div class="sub">✎ Eigenes Rezept</div>' : ""}
+    <div class="facts">${r.kcal>0?`<div class="fact"><b>${r.kcal}</b><span>kcal pro Portion</span></div>`:""}${r.t?`<div class="fact"><b>${esc(r.t)}</b><span>Zeit</span></div>`:""}<div class="fact"><b style="color:${tc}">${tn}</b><span>Art</span></div></div>
+    <button class="btn block" data-act="cook" style="padding:14px">Kochmodus starten</button>
+    <div class="acts"><button class="btn soft" data-act="fav">${fav ? "♥ Gemerkt" : "♡ Merken"}</button>
+      <select class="select input" data-act="planday" aria-label="Zum Wochenplan hinzufügen" style="flex:1 1 auto"><option value="">Zum Wochenplan …</option>${DAYS.map((d,i) => `<option value="${i}">${d}</option>`).join("")}</select></div>
+    <div id="planned" class="sub" role="status"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center"><h4>Zutaten</h4>
+      <div class="serv"><button data-act="portion" data-d="-1" aria-label="Weniger">−</button><b>${portions}</b><button data-act="portion" data-d="1" aria-label="Mehr">+</button>${portions===1?"Portion":"Portionen"}</div></div>
+    <ul class="ing">${items.map(([a,u,n]) => `<li><span class="amt">${amt(a,u,portions)}</span><span>${esc(n)}</span></li>`).join("")}</ul>
+    <h4>Zubereitung</h4>
+    <ol class="steps">${r.s.map(([t,x]) => `<li><div>${t?`<b>${esc(t)}</b>`:""}<p>${esc(x)}</p></div></li>`).join("")}</ol>
+    ${isOwn(r) ? `<div class="acts"><button class="btn soft" data-act="edit">Rezept bearbeiten</button><button class="btn danger" data-act="delete">Rezept löschen</button></div>` : ""}
+    <p class="note">Kalorien sind ungefähre Richtwerte pro Portion.</p>`;
+}
+function shareText(r){
+  const l = [r.name, [r.kcal>0?`ca. ${r.kcal} kcal pro Portion`:"", r.t, `${portions} ${portions===1?"Portion":"Portionen"}`].filter(Boolean).join(" · "), "", "Zutaten:"];
+  r.g.forEach(g => g[1].forEach(([a,u,n]) => { const t = amt(a,u,portions); l.push("• " + (t ? t + " " + n : n)); }));
+  l.push("", "Zubereitung:"); r.s.forEach(([t,x],i) => l.push(`${i+1}. ${t ? t + ": " : ""}${x}`));
+  l.push("", "Aus „Kochbuch to Go“"); return l.join("\n");
+}
+async function shareTextOut(title, text){
+  try { if (navigator.share){ await navigator.share({title, text}); return; } } catch(e){ if (e && e.name === "AbortError") return; }
+  try { await navigator.clipboard.writeText(text); alert("In die Zwischenablage kopiert."); } catch(e){ alert(text); }
+}
+
+/* ---------- Editor ---------- */
+let draft = null;
+function openEditor(id){
+  const r = id ? byId(id) : null;
+  draft = r ? {id:r.id, name:r.name, cat:r.cat, ty:r.ty, kcal:r.kcal||"", t:r.t||"",
+      ing:r.g.flatMap(g => g[1]).map(([a,u,n]) => ({a: a==null ? "" : (Array.isArray(a) ? a.map(fmt).join("–") : fmt(a)), u, n})),
+      st:r.s.map(([t,x]) => ({t, x}))}
+    : {id:null, name:"", cat:S.cat, ty:"veggie", kcal:"", t:"", ing:[{a:"",u:"",n:""},{a:"",u:"",n:""},{a:"",u:"",n:""}], st:[{t:"",x:""}]};
+  renderEditor(); openSheet();
+}
+function renderEditor(){
+  const d = draft;
+  document.getElementById("sheetBody").innerHTML = `
+    <div class="sheet-bar"><button class="x" data-act="${d.id ? "back" : "close"}">Abbrechen</button><button class="btn" data-act="saveown">Sichern</button></div>
+    <h2 class="dt-h">${d.id ? "Rezept bearbeiten" : "Neues Rezept"}</h2>
+    <label class="l" for="e-name">Name</label><input class="input" id="e-name" data-f="name" value="${esc(d.name)}">
+    <label class="l" for="e-cat">Kategorie</label><select class="input" id="e-cat" data-f="cat">${CATS.map(([c,l]) => `<option value="${c}" ${d.cat===c?"selected":""}>${l}</option>`).join("")}</select>
+    <label class="l" for="e-ty">Art</label><select class="input" id="e-ty" data-f="ty">${Object.entries(TYPES).map(([k,[n]]) => `<option value="${k}" ${d.ty===k?"selected":""}>${n}</option>`).join("")}</select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label class="l" for="e-kcal">Kalorien (optional)</label><input class="input" id="e-kcal" inputmode="numeric" data-f="kcal" value="${esc(d.kcal)}"></div>
+      <div><label class="l" for="e-t">Zeit (optional)</label><input class="input" id="e-t" data-f="t" placeholder="z. B. 15 Min." value="${esc(d.t)}"></div></div>
+    <h4>Zutaten für 1 Portion</h4><div class="sub" style="margin-bottom:8px">Menge z. B. 150, 1,5, ½ oder 2–3</div>
+    ${d.ing.map((x,i) => `<div class="erow"><input class="input" placeholder="Menge" aria-label="Menge" data-ing="${i}" data-k="a" value="${esc(x.a)}"><input class="input" placeholder="Einheit" aria-label="Einheit" data-ing="${i}" data-k="u" value="${esc(x.u)}"><input class="input" placeholder="Zutat" aria-label="Zutat" data-ing="${i}" data-k="n" value="${esc(x.n)}"><button class="del" data-act="ding" data-i="${i}" aria-label="Zutat entfernen">×</button></div>`).join("")}
+    <button class="link" data-act="aing">+ Zutat hinzufügen</button>
+    <h4>Zubereitung</h4>
+    ${d.st.map((x,i) => `<div class="srow"><div><input class="input" placeholder="Kurztitel (optional)" aria-label="Kurztitel" data-st="${i}" data-k="t" value="${esc(x.t)}" style="margin-bottom:4px"><textarea class="input" rows="3" placeholder="Was ist zu tun?" aria-label="Schritt" data-st="${i}" data-k="x">${esc(x.x)}</textarea></div><button class="del" data-act="dst" data-i="${i}" aria-label="Schritt entfernen">×</button></div>`).join("")}
+    <button class="link" data-act="ast">+ Schritt hinzufügen</button>`;
+}
+function saveOwn(){
+  const d = draft;
+  if (!d.name.trim()){ alert("Bitte einen Namen eingeben."); return; }
+  const ing = d.ing.filter(x => (x.a+x.u+x.n).trim()).map(x => {
+    const p = parseAmount(x.a);
+    if (p === undefined) return [null, "", [x.a, x.u, x.n].map(s => s.trim()).filter(Boolean).join(" ")];
+    return [p, x.u.trim(), x.n.trim()];
+  });
+  const r = {id: d.id || "eigen-" + Date.now().toString(36) + Math.random().toString(36).slice(2,6), cat:d.cat, ty:d.ty,
+    kcal: parseInt(d.kcal, 10) || 0, t: d.t.trim(), name: d.name.trim(), g:[["Zutaten", ing]],
+    s: d.st.filter(x => (x.t + x.x).trim()).map(x => [x.t.trim(), x.x.trim()])};
+  const i = S.own.findIndex(o => o.id === r.id);
+  if (i >= 0) S.own[i] = r; else S.own.push(r);
+  save(); S.cat = r.cat; openRecipe(r.id); render();
+}
+
+/* ---------- Auswahl für Wochenplan ---------- */
+let pick = null;
+function openPicker(day, cat){ pick = {day, cat, q:""}; renderPicker(); openSheet(); }
+function renderPicker(){
+  document.getElementById("sheetBody").innerHTML = `
+    <div class="sheet-bar"><button class="x" data-act="close">Abbrechen</button><b>${DAYS[pick.day]}</b></div>
+    <h2 class="dt-h">${catName(pick.cat)} wählen</h2>
+    <input class="input" id="pq" type="search" placeholder="Rezept suchen" aria-label="Rezept suchen" style="margin:8px 0">
+    <ul class="list" id="plist"></ul>`;
+  renderPickList();
+}
+function renderPickList(){
+  const it = all().filter(r => r.cat === pick.cat && matches(r, pick.q));
+  document.getElementById("plist").innerHTML = it.map(r => rowHTML(r, "pick")).join("") || `<li class="empty">Nichts gefunden.</li>`;
+}
+
+/* ---------- Kochmodus & Timer ---------- */
+let cook = null, wakeLock = null, audioCtx = null;
+async function keepAwake(on){
+  try {
+    if (on && "wakeLock" in navigator){ wakeLock = await navigator.wakeLock.request("screen"); }
+    if (!on && wakeLock){ await wakeLock.release(); wakeLock = null; }
+  } catch(e){}
+}
+function openCook(){
+  const r = byId(cur); cook = {id:r.id, page:0, checked:new Set()};
+  try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+  renderCook(); document.getElementById("cook").showModal(); keepAwake(true);
+}
+function renderCook(){
+  const r = byId(cook.id), total = r.s.length, p = cook.page, items = r.g.flatMap(g => g[1]);
+  let body;
+  if (p === 0){
+    body = `<div class="cook-title">Zutaten bereitlegen</div><div class="sub">${portions} ${portions===1?"Portion":"Portionen"} · antippen zum Abhaken</div>
+      <ul class="cook-ing">${items.map(([a,u,n],i) => `<li><button class="${cook.checked.has(i)?"done":""}" data-act="cchk" data-i="${i}"><b>${amt(a,u,portions)}</b> ${esc(n)}</button></li>`).join("")}</ul>`;
+  } else {
+    const [t,x] = r.s[p-1], m = timerMinutes(x);
+    body = `<div class="cook-step">Schritt ${p} von ${total}</div>${t?`<div class="cook-title">${esc(t)}</div>`:""}<div class="cook-text">${esc(x)}</div>
+      ${m ? `<button class="btn gold block" style="margin-top:18px;padding:16px;font-size:1.15rem" data-act="timer" data-m="${m}" data-l="${esc((t||"Schritt "+p))}">⏱ Timer ${dur(m)} starten</button>` : ""}`;
+  }
+  document.getElementById("cookBody").innerHTML = `
+    <div class="sheet-bar"><button class="x" data-act="cookclose">Schließen</button><b style="text-align:right;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</b></div>
+    <div class="prog"><i style="width:${total ? p/total*100 : 100}%"></i></div>
+    <div class="cook-page" id="cookpage">${body}</div>
+    <div class="timers" id="cooktimers"></div>
+    <div class="cook-nav"><button class="btn soft" data-act="cprev" ${p===0?"disabled":""}>‹ Zurück</button>
+      ${p < total ? `<button class="btn" data-act="cnext">${p===0?"Los geht’s":"Weiter ›"}</button>` : `<button class="btn" data-act="cookclose">Fertig ✓</button>`}</div>`;
+  renderTimers();
+}
+function startTimer(min, label){
+  const r = byId(cook.id);
+  S.timers.push({id:Date.now()+Math.random(), label: r.name + ": " + label, end: Date.now() + min*60000, rung:false});
+  try { if (audioCtx && audioCtx.state === "suspended") audioCtx.resume(); } catch(e){}
+  renderTimers();
+}
+function beep(){
+  try {
+    if (!audioCtx) return;
+    [0, 0.35, 0.7].forEach(off => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.frequency.value = 880; o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.25, audioCtx.currentTime + off); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + off + 0.3);
+      o.start(audioCtx.currentTime + off); o.stop(audioCtx.currentTime + off + 0.3);
+    });
+  } catch(e){}
+}
+function renderTimers(){
+  const now = Date.now();
+  const html = S.timers.map(t => {
+    const rem = Math.max(0, Math.ceil((t.end - now)/1000));
+    return `<div class="tmr ${rem===0?"ring":""}"><span>${rem===0?"🔔":"⏱"}</span><span class="lbl">${esc(t.label)}</span>
+      <span class="t">${rem===0 ? "Fertig!" : Math.floor(rem/60) + ":" + String(rem%60).padStart(2,"0")}</span>
+      <button class="x" data-act="tstop" data-id="${t.id}" aria-label="Timer beenden">×</button></div>`;
+  }).join("");
+  const box = document.getElementById("cooktimers"); if (box) box.innerHTML = html;
+  const pill = document.getElementById("timerpill");
+  if (S.timers.length && !document.getElementById("cook").open){
+    const next = S.timers.slice().sort((a,b) => a.end - b.end)[0], rem = Math.max(0, Math.ceil((next.end - now)/1000));
+    pill.hidden = false; pill.textContent = rem === 0 ? "🔔 Timer fertig!" : `⏱ ${Math.floor(rem/60)}:${String(rem%60).padStart(2,"0")} · ${S.timers.length} Timer`;
+  } else pill.hidden = true;
+}
+setInterval(() => {
+  if (!S.timers.length) return;
+  const now = Date.now();
+  S.timers.forEach(t => { if (!t.rung && t.end <= now){ t.rung = true; beep(); } });
+  if (S.timers.some(t => t.end <= now && now - t.end < 60000 && (Math.floor((now - t.end)/1000) % 5 === 0))) beep();
+  renderTimers();
+}, 1000);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && document.getElementById("cook").open) keepAwake(true); });
+
+/* ---------- Sheets ---------- */
+function openSheet(){ const d = document.getElementById("sheet"); if (!d.open) d.showModal(); d.querySelector(".sheet").scrollTop = 0; }
+function closeSheet(){ const d = document.getElementById("sheet"); if (d.open) d.close(); }
+document.getElementById("sheet").addEventListener("close", () => { render(); });
+document.getElementById("cook").addEventListener("close", () => { keepAwake(false); renderTimers(); });
+
+/* ---------- Ereignisse ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b || b.tagName === "SELECT") return;
+  const a = b.dataset.act, id = b.dataset.id;
+  switch (a){
+    case "tab": S.view = id; render(); window.scrollTo(0,0); break;
+    case "cat": S.cat = id; render(); break;
+    case "open": openRecipe(id); break;
+    case "close": closeSheet(); break;
+    case "back": openRecipe(draft.id); break;
+    case "new": openEditor(null); break;
+    case "edit": openEditor(cur); break;
+    case "delete": {
+      const r = byId(cur);
+      if (confirm(`„${r.name}“ wirklich löschen?`)){
+        S.own = S.own.filter(o => o.id !== cur); S.favs.delete(cur);
+        Object.keys(S.plan).forEach(k => { if (S.plan[k] === cur) delete S.plan[k]; });
+        save(); closeSheet();
+      }
+      break;
+    }
+    case "fav": S.favs.has(cur) ? S.favs.delete(cur) : S.favs.add(cur); save(); renderDetail(); break;
+    case "share": shareTextOut(byId(cur).name, shareText(byId(cur))); break;
+    case "portion": portions = Math.min(12, Math.max(1, portions + +b.dataset.d)); renderDetail(); break;
+    case "cook": openCook(); break;
+    case "saveown": saveOwn(); break;
+    case "aing": draft.ing.push({a:"",u:"",n:""}); renderEditor(); break;
+    case "ding": draft.ing.splice(+b.dataset.i, 1); renderEditor(); break;
+    case "ast": draft.st.push({t:"",x:""}); renderEditor(); break;
+    case "dst": draft.st.splice(+b.dataset.i, 1); renderEditor(); break;
+    case "pick": S.plan[pick.day + "|" + pick.cat] = id; save(); closeSheet(); break;
+    case "swap": openPicker(+b.dataset.day, b.dataset.cat); break;
+    case "unplan": delete S.plan[b.dataset.day + "|" + b.dataset.cat]; save(); render(); break;
+    case "fill":
+      for (let i = 0; i < 7; i++) ["fruehstueck","mittag","snack","abend"].forEach(c => {
+        if (!S.plan[i+"|"+c]){ const o = all().filter(r => r.cat === c); S.plan[i+"|"+c] = o[Math.floor(Math.random()*o.length)].id; }
+      });
+      save(); render(); break;
+    case "clearplan": if (confirm("Ganzen Wochenplan leeren?")){ S.plan = {}; S.checked = new Set(); save(); render(); } break;
+    case "people": S.people = Math.min(10, Math.max(1, S.people + +b.dataset.d)); save(); render(); break;
+    case "check": { const k = b.dataset.key; S.checked.has(k) ? S.checked.delete(k) : S.checked.add(k); save(); render(); break; }
+    case "resetchecks": S.checked = new Set(); save(); render(); break;
+    case "addextra": addExtra(); break;
+    case "clearextras": S.extras = S.extras.filter(x => !S.checked.has("extra|"+x)); save(); render(); break;
+    case "shareshop": {
+      const l = ["Einkaufsliste (Kochbuch to Go)", ""];
+      shopItems().filter(i => !S.checked.has(i.key)).forEach(i => l.push("• " + (i.amount ? i.amount + " " : "") + i.name));
+      S.extras.filter(x => !S.checked.has("extra|"+x)).forEach(x => l.push("• " + x));
+      shareTextOut("Einkaufsliste", l.join("\n")); break;
+    }
+    case "cprev": cook.page = Math.max(0, cook.page - 1); renderCook(); break;
+    case "cnext": cook.page++; renderCook(); break;
+    case "cchk": { const i = +b.dataset.i; cook.checked.has(i) ? cook.checked.delete(i) : cook.checked.add(i); renderCook(); break; }
+    case "cookclose": document.getElementById("cook").close(); break;
+    case "timer": startTimer(+b.dataset.m, b.dataset.l); break;
+    case "tstop": S.timers = S.timers.filter(t => String(t.id) !== b.dataset.id); renderTimers(); break;
+  }
+});
+document.getElementById("timerpill").addEventListener("click", () => {
+  if (cook && byId(cook.id)){ renderCook(); document.getElementById("cook").showModal(); keepAwake(true); }
+});
+function addExtra(){
+  const el = document.getElementById("extra"), v = el ? el.value.trim() : "";
+  if (v && !S.extras.includes(v)){ S.extras.push(v); save(); }
+  render(); const n = document.getElementById("extra"); if (n) n.focus();
+}
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.id === "q"){ S.q = t.value; renderList(); }
+  if (t.id === "pq"){ pick.q = t.value; renderPickList(); }
+  if (t.dataset.f) draft[t.dataset.f] = t.value;
+  if (t.dataset.ing !== undefined) draft.ing[+t.dataset.ing][t.dataset.k] = t.value;
+  if (t.dataset.st !== undefined) draft.st[+t.dataset.st][t.dataset.k] = t.value;
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "ty"){ S.ty = t.value; renderList(); }
+  if (t.dataset.act === "addmeal" && t.value){ openPicker(+t.dataset.day, t.value); t.value = ""; }
+  if (t.dataset.act === "planday" && t.value !== ""){
+    const r = byId(cur), d = +t.value; S.plan[d + "|" + r.cat] = r.id; save();
+    document.getElementById("planned").textContent = `✓ Steht jetzt am ${DAYS[d]} im Wochenplan (${catName(r.cat)}).`; t.value = "";
+  }
+});
+document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "extra"){ e.preventDefault(); addExtra(); } });
+// Wischen im Kochmodus
+let tx = null;
+document.getElementById("cook").addEventListener("touchstart", e => { tx = e.touches[0].clientX; }, {passive:true});
+document.getElementById("cook").addEventListener("touchend", e => {
+  if (tx === null || !cook) return; const dx = e.changedTouches[0].clientX - tx; tx = null;
+  const total = byId(cook.id).s.length;
+  if (dx < -60 && cook.page < total){ cook.page++; renderCook(); }
+  if (dx > 60 && cook.page > 0){ cook.page--; renderCook(); }
+}, {passive:true});
+
+load(); render();
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); }); }
+</script>
+</body>
+</html>
